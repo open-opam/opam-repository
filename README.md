@@ -31,7 +31,30 @@ pinned by the checksums in their opam files; this repository hosts no archives.
 
 ## Publish to it
 
-See [docs/publishing.md](docs/publishing.md).
+```sh
+opam repo add open-opam https://github.com/open-opam/opam-repository.git --rank=-1
+opam install open-opam
+
+open-opam init            # once
+open-opam publish 1.2.3   # each release
+```
+
+`publish` checks the commit first, so a mistake does not cost a version number,
+then tags it, makes an immutable release and opens one pull request, which merges
+by itself once the checks pass. Its checklist says what to fix for anything that
+fails.
+
+Only you can provide two things: CI that runs on pushes to the branch you tag, and
+a `README`, an `.mli` and a test. The registry reads your CI's result and does not
+run your tests.
+
+**Names.** The first time a name is published here, the repository's permanent
+number is saved in `.open-opam/owners/<name>.json`, and every later publication
+must carry it. A name official opam holds can only be published from the repository
+official opam names for it, and a package can be in both, in either order. Any
+other name is first-come; if official opam later holds it from another repository,
+official opam wins and the versions here are revoked. A fork publishes under its
+own name, and a drop-in replacement is a consumer's choice, with `opam pin`.
 
 ## Limits
 
