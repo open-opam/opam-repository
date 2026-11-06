@@ -1,0 +1,110 @@
+# Every gate, on one exact commit of one pull request. It is read from main and
+# runs the validator main names, so a submission cannot weaken its own gate.
+# Package code runs only in the install job, which has nothing worth taking, and
+# which no other job relies on: no cache is restored and no artifact is read.
+name: validate
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: The pull request's number
+        required: true
+      sha:
+        description: The exact head commit to validate
+        required: true
+
+permissions: {}
+
+jobs:
+  gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      kind: ${{ steps.kind.outputs.kind }}
+      versions: ${{ steps.kind.outputs.versions }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR: ${{ inputs.pr }}
+      SHA: ${{ inputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/install-cli
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq opam
+      - id: kind
+        name: Fetch the pull request's commit, without checking it out
+        run: |
+          case "$PR" in *[!0-9]*|'') echo "Not a number."; exit 1;; esac
+          case "$SHA" in *[!0-9a-f]*|'') echo "Not a commit."; exit 1;; esac
+          git fetch --quiet "https://github.com/$REPO" "refs/pull/$PR/head:refs/heads/change"
+          test "$(git rev-parse change)" = "$SHA"
+          head_repo=$(gh api "repos/$REPO/pulls/$PR" --jq .head.repo.full_name)
+          if [ "$head_repo" = "$REPO" ]; then kind=registry; else kind=publication; fi
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+          versions=$(git diff --name-only --diff-filter=A main...change -- 'packages/*/*/opam' | cut -d/ -f3 | tr '\n' ' ')
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+      - name: The gates that need no package code
+        if: steps.kind.outputs.kind == 'publication'
+        run: open-opam validate --registry . --base main --head change --registry-repo "$REPO" | tee -a "$GITHUB_STEP_SUMMARY"
+        shell: bash -o pipefail -e {0}
+      - name: A branch of this repository is only linted
+        if: steps.kind.outputs.kind == 'registry'
+        run: |
+          git diff --name-only --diff-filter=AM main...change -- 'packages/*/*/opam' | while read -r file; do
+            git show "change:$file" | opam lint -
+          done
+
+  install:
+    needs: gates
+    if: needs.gates.outputs.kind == 'publication'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      PR: ${{ inputs.pr }}
+      VERSIONS: ${{ needs.gates.outputs.versions }}
+      OPAMYES: "1"
+      OPAMCONFIRMLEVEL: unsafe-yes
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/pull/${{ inputs.pr }}/head
+          persist-credentials: false
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq opam
+      - run: opam init --bare --disable-sandboxing -n default https://opam.ocaml.org
+      - run: opam repo add --dont-select registry "file://$PWD"
+      - run: opam switch create check --empty --repos=default,registry
+      - name: Package code runs here
+        run: opam install --switch=check $VERSIONS
+
+  report:
+    needs: [gates, install]
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions:
+      checks: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      SHA: ${{ inputs.sha }}
+      GATES: ${{ needs.gates.result }}
+      INSTALL: ${{ needs.install.result }}
+      KIND: ${{ needs.gates.outputs.kind }}
+    steps:
+      - name: Post the required check, from the jobs' results alone
+        run: |
+          conclusion=failure
+          if [ "$GATES" = success ]; then
+            if [ "$KIND" = registry ] && [ "$INSTALL" = skipped ]; then conclusion=success; fi
+            if [ "$KIND" = publication ] && [ "$INSTALL" = success ]; then conclusion=success; fi
+          fi
+          gh api "repos/$REPO/check-runs" -X POST -f name=validate -f head_sha="$SHA" -f status=completed -f conclusion="$conclusion" --silent

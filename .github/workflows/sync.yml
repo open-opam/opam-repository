@@ -1,0 +1,51 @@
+# Official opam wins a conflict over a name, which its repository rank alone
+# would not do: the solver would still prefer a higher version here. A release
+# that has gone only opens an issue, since installing it already fails closed.
+name: sync
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: ./.github/actions/install-cli
+      - run: open-opam sync --registry . | tee found
+        shell: bash -o pipefail -e {0}
+      - name: Open a revocation for names official opam now holds
+        run: |
+          grep -q '^revoked: ' found || exit 0
+          branch="revoke/sync-$GITHUB_RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add packages .open-opam
+          git commit -m "Revoke what official opam now holds from elsewhere"
+          git push origin "$branch"
+          url=$(gh pr create --base main --head "$branch" --title "Revoke what official opam now holds from elsewhere" --body "$(grep '^revoked: ' found)")
+          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)"
+          gh pr merge "${url##*/}" --auto --squash -R "$REPO"
+      - name: Open an issue for releases that have gone or changed
+        run: |
+          grep -q '^missing: ' found || exit 0
+          title="Releases that have gone or changed"
+          if [ -z "$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')" ]; then
+            grep '^missing: ' found > body
+            gh issue create --title "$title" --body-file body
+          fi

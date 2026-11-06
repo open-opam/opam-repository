@@ -29,10 +29,18 @@ Each package's opam file is under `packages/`, and its owning repository is in
 byte from the repository that published them. Their archives stay on GitHub,
 pinned by the checksums in their opam files; this repository hosts no archives.
 
+## Publish to it
+
+See [docs/publishing.md](docs/publishing.md).
+
 ## Limits
 
 - GitHub and dune only.
-- Names are first-come, unless official opam holds the name.
+- Names are first-come, unless official opam holds the name. An abandoned
+  repository someone took over before its name was first published here would be
+  trusted, and the answer is [a dispute](DISPUTES.md).
+- Tests are run by the author's CI, not by the registry, and a package is installed
+  on one platform.
 - Official packages' version bounds are not tested against releases here, so a
   release here can change what your official packages resolve to.
 - No guarantee against malicious code. A package that installs has not been

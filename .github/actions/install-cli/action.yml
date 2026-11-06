@@ -1,0 +1,19 @@
+# The one place the registry names its validator. A submission can never choose
+# its own gate: moving to a newer release is a maintainer's pull request.
+name: Install the CLI
+description: Installs the exact open-opam release the registry runs
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: "@CLI_VERSION@"
+        SHA256: "@CLI_SHA256@"
+      run: |
+        gh release download "$VERSION" -R open-opam/open-opam-cli -p open-opam-linux-x86_64 -D "$RUNNER_TEMP"
+        echo "$SHA256  $RUNNER_TEMP/open-opam-linux-x86_64" | sha256sum -c -
+        chmod +x "$RUNNER_TEMP/open-opam-linux-x86_64"
+        mkdir -p "$RUNNER_TEMP/bin"
+        mv "$RUNNER_TEMP/open-opam-linux-x86_64" "$RUNNER_TEMP/bin/open-opam"
+        echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"

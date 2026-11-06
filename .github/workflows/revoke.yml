@@ -1,0 +1,59 @@
+# A judgement revocation. Only someone who can write to this repository can start
+# a workflow; that is the authorisation, and the record says who it was.
+name: revoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: The package
+        required: true
+      version:
+        description: The version, or empty for every version
+        required: false
+      reason:
+        description: Why
+        required: true
+        type: choice
+        options: [security, legal, author-request, upstream-gone]
+      evidence:
+        description: A link to what shows why
+        required: true
+
+permissions: {}
+
+jobs:
+  revoke:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      NAME: ${{ inputs.name }}
+      VERSION: ${{ inputs.version }}
+      REASON: ${{ inputs.reason }}
+      EVIDENCE: ${{ inputs.evidence }}
+      ACTOR: ${{ github.actor }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: ./.github/actions/install-cli
+      - run: |
+          if [ -n "$VERSION" ]; then set -- --version "$VERSION"; else set --; fi
+          open-opam revoke --registry . --name "$NAME" "$@" --reason "$REASON" --actor "$ACTOR" --evidence "$EVIDENCE"
+      - name: Open the pull request and let it merge once validated
+        run: |
+          branch="revoke/$GITHUB_RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add packages .open-opam
+          git commit -m "Revoke $NAME $VERSION" -m "Reason: $REASON. Evidence: $EVIDENCE"
+          git push origin "$branch"
+          url=$(gh pr create --base main --head "$branch" --title "Revoke $NAME $VERSION" --body "Reason: $REASON. Evidence: $EVIDENCE. Actor: $ACTOR.")
+          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)"
+          gh pr merge "${url##*/}" --auto --squash -R "$REPO"

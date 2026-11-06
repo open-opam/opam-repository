@@ -1,0 +1,61 @@
+# GitHub can hold a first-time contributor's workflows for approval, but not one
+# on pull_request_target, so this is what lets a publication be validated with no
+# click. It runs with write permissions, so it never checks out the pull request,
+# and nothing the pull request controls reaches a shell but its number and SHA.
+name: pr
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions: {}
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      pull-requests: read
+    outputs:
+      publication: ${{ steps.paths.outputs.publication }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+      HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
+    steps:
+      - id: paths
+        name: Validate a publication, or a branch of this repository
+        run: |
+          if [ "$BASE_REF" != main ]; then
+            echo "publication=false" >> "$GITHUB_OUTPUT"
+            echo "A pull request must target main."
+            exit 0
+          fi
+          if [ "$HEAD_REPO" = "$REPO" ]; then
+            echo "publication=false" >> "$GITHUB_OUTPUT"
+          else
+            gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[].filename' > files
+            if grep -qvE '^(packages/[^/]+/[^/]+/opam|\.open-opam/owners/[^/]+\.json)$' files; then
+              echo "publication=false" >> "$GITHUB_OUTPUT"
+              echo "A fork may only add a release's files, so this is not validated."
+              exit 0
+            fi
+            echo "publication=true" >> "$GITHUB_OUTPUT"
+          fi
+          gh workflow run validate.yml -R "$REPO" --ref main -f pr="$PR" -f sha="$SHA"
+
+  automerge:
+    needs: dispatch
+    if: needs.dispatch.outputs.publication == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Merge once the required check passes on this exact head
+        run: gh pr merge "${{ github.event.pull_request.number }}" --auto --squash -R "${{ github.repository }}"

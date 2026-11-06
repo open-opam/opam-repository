@@ -11,6 +11,11 @@ repo                                   the repository's opam configuration
 packages/<name>/<name>.<version>/opam  one published version of a package
 .open-opam/owners/<name>.json          the repository that owns a name
 .open-opam/revocations/                a record for each revoked version
+.github/workflows/pr                   lets a first-time contributor be validated
+.github/workflows/validate             every gate, on one exact commit
+.github/workflows/revoke, sync         open revocations, and issues
+.github/actions/install-cli            the exact CLI release the registry runs
+docs/publishing.md                     how an author publishes
 ```
 
 opam reads `repo` and `packages/`, and ignores everything else. It is served
@@ -35,3 +40,12 @@ from git, so nothing is generated: `opam update` reads the tree at `main`.
   published them.** They predate immutable releases, so this is the only way
   they arrive; their checksums pin their archives. Why: anything else would mean
   a second way in. Symptom: another version added without its release.
+- **The validator is the exact release `install-cli` names, never anything from a
+  pull request, and no privileged job checks out or runs a pull request's code.**
+  Why: a submission must not be able to weaken its own gate, and a write token must
+  never share a job with untrusted code. Symptom: `pull_request_target` beside a
+  checkout, or a validator built from the change.
+- **No job relies on the install job.** Package code controls it, so it restores no
+  cache, nothing reads an artifact from it, and `report` reads only job results.
+  Why: a passing install says only that a willing package installed. Symptom: a
+  cache, an artifact, or a log line used for a decision.
