@@ -1,0 +1,47 @@
+opam-version: "2.0"
+synopsis:
+  "A Model Context Protocol server: the routes an agent calls tools and reads resources through"
+description:
+  "MCP 2026-07-28 over Streamable HTTP, as routes added to a Spindle application's own: server/discover, tools/list and tools/call, each tool a name, its arguments' and its result's descriptions, and a dependency giving its function; resources and RFC 6570 templates read through resources/read, and watched through subscriptions/listen."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/spindle"
+bug-reports: "https://github.com/hyphatech/spindle/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "spindle" {= version}
+  "spindle-http" {= version}
+  "spindle-mcp-client" {= version}
+  "wiretype" {>= "0.6.1" & < "0.7.0"}
+  "ptime" {>= "1.2.0"}
+  "base64" {>= "3.5.2"}
+  "logs" {>= "0.10.0"}
+  "eio" {>= "1.6"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/spindle.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "7ca7fa3082b3d2b891ba3e520f0c4a7648a92b63"
+url {
+  src: "https://github.com/hyphatech/spindle/releases/download/0.14.1/spindle-0.14.1.tar.gz"
+  checksum: [
+    "sha256=eb31a4ba0c93c042301b90111b9f4b90df742b919d138e0233b0da10ae571968"
+    "sha512=209288f3d46d4be8aedabb8ebb68b2929330ea240304a0dbe768a5e194544d1ea725577746a7b8dff4ff4791eb36ef4adec5ee53e431c2ae3550768d2b294c9b"
+  ]
+}

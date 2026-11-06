@@ -1,0 +1,47 @@
+opam-version: "2.0"
+synopsis:
+  "Migrations for Postgres: plain SQL files, forward only, and the command that applies them"
+description:
+  "A directory of timestamped SQL files, applied in order under an advisory lock, each in one transaction with the row that records it and a digest of its text, or on its own where Postgres refuses one; a schema dump that changes only when the schema does; and a history squashed into one baseline."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/rowtype"
+bug-reports: "https://github.com/hyphatech/rowtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "rowtype" {= version}
+  "rowtype-postgres" {= version}
+  "ptime" {>= "1.2.0"}
+  "cmdliner" {>= "2.1.1"}
+  "eio" {>= "1.5"}
+  "mtime" {>= "2.1.0"}
+  "eio_main" {>= "1.5"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/rowtype.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "b2ea8bf2aa179f7bb01b69cd256fdacb3cd0f45f"
+url {
+  src: "https://github.com/hyphatech/rowtype/releases/download/0.8.1/rowtype-0.8.1.tar.gz"
+  checksum: [
+    "sha256=4ef8fed08ff9142478787504724cd58ba59e7a88f9f4b7b0dac7d5958f4cbcbd"
+    "sha512=77454bfa13fb51dbd2e2fbfaabd2f3658a5559e4a66ef9d31f2675b72d7eb524760524a08bf8a8cb7c6b5fb550b86e01d3654704744c3c69f6af49acc0a5564d"
+  ]
+}

@@ -1,0 +1,56 @@
+opam-version: "2.0"
+synopsis: "Calling other servers from Eio, over HTTPS, with no web framework"
+description:
+  "Calls, streamed bodies, Server-Sent Events and WebSockets, over HTTPS with the system's trust store, a switch and a deadline per call, on spindle-http alone."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/spindle"
+bug-reports: "https://github.com/hyphatech/spindle/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "spindle-http" {= version}
+  "wiretype" {>= "0.6.1" & < "0.7.0"}
+  "eio" {>= "1.6"}
+  "cstruct" {>= "6.2.0"}
+  "iomux" {>= "0.4"}
+  "mtime" {>= "2.1.0"}
+  "ptime" {>= "1.2.0"}
+  "uri" {>= "4.4.0"}
+  "tls" {>= "2.1.2"}
+  "tls-eio" {>= "2.1.2"}
+  "x509" {>= "1.1.1"}
+  "ipaddr" {>= "5.6.2"}
+  "ca-certs" {>= "1.0.3"}
+  "mirage-crypto-rng" {>= "2.4.1"}
+  "base64" {>= "3.5.2"}
+  "domain-name" {>= "0.5.0"}
+  "digestif" {>= "1.3.1"}
+  "logs" {>= "0.10.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/spindle.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "3ab73f0537c9de095479ce5dce8fc5d63af00c58"
+url {
+  src: "https://github.com/hyphatech/spindle/releases/download/0.12.0/spindle-0.12.0.tar.gz"
+  checksum: [
+    "sha256=5600df02cfc97c5b82916ef169709a736fdd59f922563c1cbdd7d3e6f0690b93"
+    "sha512=a496ab29f4088193004e6fef9bdb55655847c53272305f1ba6252a1040a533498199c0de302dce2883de5211bc147c5144ee61f224d090f31fed23e2ba2a0452"
+  ]
+}

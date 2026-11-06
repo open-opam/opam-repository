@@ -1,0 +1,47 @@
+opam-version: "2.0"
+synopsis: "[@@deriving wiretype]: a type's wiretype description, derived"
+description:
+  "Writes a type's description from records, enums, tagged unions, polymorphic variants, type parameters and recursive types, with bounds, defaults, docs and examples as attributes. What it writes is wiretype's public combinators."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/wiretype"
+bug-reports: "https://github.com/hyphatech/wiretype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "wiretype" {= version}
+  "ppxlib" {>= "0.38.0"}
+  "ptime" {with-test & >= "1.2.0"}
+  "mtime" {with-test & >= "2.1.0"}
+  "uuidm" {with-test & >= "0.9.10"}
+  "yojson" {with-test & >= "3.0.0"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "qcheck-core" {with-test & >= "0.91"}
+  "qcheck-alcotest" {with-test & >= "0.91"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/wiretype.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "faf01d6e71f4b80baa44f77107cf50d15704ce60"
+url {
+  src: "https://github.com/hyphatech/wiretype/releases/download/0.6.1/wiretype-0.6.1.tar.gz"
+  checksum: [
+    "sha256=28638526f8e6311b12c20ecd3e5408b42ef7306e330d47a502ae99f8688f09b0"
+    "sha512=bb231c15c90770a2a839106d6ea423d5faf4ea35984ea8f13fff621a04e1d75eb4ce1a51a4f05ba4f9ffca430476b370c66a45c97363a0385ee1eb954d00e5dd"
+  ]
+}

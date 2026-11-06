@@ -1,0 +1,49 @@
+opam-version: "2.0"
+synopsis: "Solid, typed: OCaml front ends on SolidJS, through Melange"
+description:
+  "Bindings to Solid for Melange, written in OCaml's JSX, where a reactive read in the wrong place does not compile. The JSX reaches the browser as the code Solid's own compiler emits for it."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/solidtype"
+bug-reports: "https://github.com/hyphatech/solidtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "melange" {>= "7.0.1-55"}
+  "mlx" {>= "0.11"}
+  "ppx_solidtype" {= version}
+  "melange-jest" {with-test & >= "0.2.0"}
+  "spindle" {with-test & >= "0.8.0" & < "0.9.0"}
+  "wiretype" {with-test & >= "0.6.0" & < "0.7.0"}
+  "eio_main" {with-test & >= "1.6"}
+  "merlin" {with-dev-setup & >= "5.6-504"}
+  "ocaml-lsp-server" {with-dev-setup & >= "1.24.0"}
+  "ocamlformat" {with-dev-setup & = "0.29.0"}
+  "ocamlformat-mlx" {with-dev-setup & = "0.29.0.1"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/solidtype.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "795b0e3a5fefc4125ee90a369c27bf1a77070210"
+url {
+  src: "https://github.com/hyphatech/solidtype/releases/download/0.1.0/solidtype-0.1.0.tar.gz"
+  checksum: [
+    "sha256=927704ec09df8f2da8c4e08ec2fb308912487311dfc5bd660a8fb353f31ae816"
+    "sha512=276bc77222286cb8dfd78d2b283617c41942e80ca0ba62b3a791e7126fefceb1a915e52d34f55763b66daddfd3c19ea4751a2f7089072029c165211606880133"
+  ]
+}

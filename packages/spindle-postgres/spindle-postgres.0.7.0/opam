@@ -1,0 +1,63 @@
+opam-version: "2.0"
+synopsis:
+  "Postgres for a Spindle server: bounded connections, a pool and its probe, and a failure's refusal"
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/spindle"
+bug-reports: "https://github.com/hyphatech/spindle/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "spindle" {= version}
+  "rowtype" {>= "0.8.0" & < "0.9.0"}
+  "rowtype-postgres" {>= "0.8.0" & < "0.9.0"}
+  "ptime" {>= "1.2.0"}
+  "mtime" {>= "2.1.0"}
+  "eio" {>= "1.6"}
+  "logs" {>= "0.10.0"}
+  "spindle-cli" {with-test & = version}
+  "alcotest" {with-test & >= "1.9.1"}
+  "qcheck-core" {with-test & >= "0.91"}
+  "qcheck-alcotest" {with-test & >= "0.91"}
+  "eio_main" {with-test & >= "1.6"}
+  "wiretype" {with-test & >= "0.5.0" & < "0.6.0"}
+  "uri" {with-test & >= "4.4.0"}
+  "angstrom" {with-test & >= "0.16.1"}
+  "ipaddr" {with-test & >= "5.6.2"}
+  "cstruct" {with-test & >= "6.3.0"}
+  "base64" {with-test & >= "3.5.2"}
+  "decompress" {with-test & >= "1.6.0"}
+  "mirage-crypto-rng" {with-test & >= "2.4.1"}
+  "fmt" {with-test & >= "0.11.0"}
+  "yojson" {with-test & >= "3.0.0"}
+  "httpun" {with-test & >= "0.2.0"}
+  "tls" {with-test & >= "2.1.2"}
+  "tls-eio" {with-test & >= "2.1.2"}
+  "x509" {with-test & >= "1.2.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/spindle.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "dab1b80a04e8a7bade0305356b85a22c44e4d7aa"
+url {
+  src: "https://github.com/hyphatech/spindle/releases/download/0.7.0/spindle-0.7.0.tar.gz"
+  checksum: [
+    "sha256=647762925b00768a92096d89f872f6ee6fd47f622f3e9061cd3a48692311c208"
+    "sha512=5829870aa118974aabb459fbe9a0fd55eca76e085ffea578c0ffafc1d68a2b2225a562dde4489720b50c7b30726a7f8fc3af3eede4558895272adb549ee80bad"
+  ]
+}

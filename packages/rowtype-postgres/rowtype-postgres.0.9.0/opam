@@ -1,0 +1,49 @@
+opam-version: "2.0"
+synopsis: "The Postgres backend for rowtype, over postgres-eio"
+description:
+  "Connections and a pool, notifications, transactions whose own failures are values, a load through one COPY, and a statement checked against the database without running it."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/rowtype"
+bug-reports: "https://github.com/hyphatech/rowtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "rowtype" {= version}
+  "postgres-eio" {>= "0.5.0" & < "0.6.0"}
+  "ptime" {>= "1.2.0"}
+  "uuidm" {>= "0.9.10"}
+  "eio" {>= "1.5"}
+  "logs" {>= "0.10.0"}
+  "mtime" {>= "2.1.0"}
+  "eio_main" {with-test & >= "1.5"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "qcheck-core" {with-test & >= "0.91"}
+  "cstruct" {with-test & >= "6.3.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/rowtype.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "7583020581742bf4476eba7b466501669eab4878"
+url {
+  src: "https://github.com/hyphatech/rowtype/releases/download/0.9.0/rowtype-0.9.0.tar.gz"
+  checksum: [
+    "sha256=4f280540e5bbe8f50c665af93c302ccb34ab24cd014836771b3740fd9d33feb9"
+    "sha512=72acdf2018d5ba5b308ce181842073e7d3ae103b786cca927f44be45a27f852c7da00d47806158faf97d09c99dbf51555b8144ab74c7561027d98d69ee99d06e"
+  ]
+}

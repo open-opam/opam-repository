@@ -1,0 +1,38 @@
+opam-version: "2.0"
+synopsis: "An application's command line: its API, described from the routes"
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/spindle"
+bug-reports: "https://github.com/hyphatech/spindle/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "spindle" {= version}
+  "cmdliner" {>= "2.1.1"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/spindle.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "2c2bc9075786e50db58efc9118316ddbb91966db"
+url {
+  src: "https://github.com/hyphatech/spindle/releases/download/0.14.2/spindle-0.14.2.tar.gz"
+  checksum: [
+    "sha256=173daf72f65d2a174a4edbf4a5a9e5aaeae0990a2c9818781120532508c99ac6"
+    "sha512=4d6915052d8540dfdb0c31078796c9e21809a39b1e7ac2bc7c1173d8984b02d636ae55a7f52fe39e6fcdb8116d667138e1720eb3ce60848997fa8352bc27e87e"
+  ]
+}

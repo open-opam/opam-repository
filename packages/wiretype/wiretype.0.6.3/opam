@@ -1,0 +1,47 @@
+opam-version: "2.0"
+synopsis: "JSON contracts for modern OCaml"
+description:
+  "One value describes a JSON shape: it reads a document in one pass with every problem found, writes a value, checks the bounds it states, and prints itself as JSON Schema 2020-12, as Zod and as Melange, so a server, a browser and a model read one contract. Depends on Ptime, Mtime and Uuidm alone."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/wiretype"
+bug-reports: "https://github.com/hyphatech/wiretype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "ptime" {>= "1.2.0"}
+  "mtime" {>= "2.1.0"}
+  "uuidm" {>= "0.9.10"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "melange" {with-test & >= "7.0.1-55"}
+  "odoc" {with-dev-setup & >= "3.2.1"}
+  "merlin" {with-dev-setup & >= "5.6-504"}
+  "ocaml-lsp-server" {with-dev-setup & >= "1.25.0"}
+  "ocamlformat" {with-dev-setup & = "0.29.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/wiretype.git"
+x-maintenance-intent: ["(latest)"]
+x-commit-hash: "bf61c990b7d88c8604907755f47a6c926281b6bc"
+url {
+  src: "https://github.com/hyphatech/wiretype/releases/download/0.6.3/wiretype-0.6.3.tar.gz"
+  checksum: [
+    "sha256=db5c75e078abe169a384bf0fb326aa9dbaf6b6b157bdc36252586b6a93e4be29"
+    "sha512=289d3ec499151eb272fa5bbb3478fe616de233abab9df8526eb0422fbf2e2ef59c533ec19227c672b4afab4baf0d1af3386f1245368925fd017085d7fa07d8dc"
+  ]
+}
