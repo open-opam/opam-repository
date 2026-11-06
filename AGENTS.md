@@ -15,7 +15,6 @@ packages/<name>/<name>.<version>/opam  one published version of a package
 .github/workflows/validate             every gate, on one exact commit
 .github/workflows/revoke, sync         open revocations, and issues
 .github/actions/install-cli            the exact CLI release the registry runs
-docs/publishing.md                     how an author publishes
 ```
 
 opam reads `repo` and `packages/`, and ignores everything else. It is served
