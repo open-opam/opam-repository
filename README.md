@@ -55,7 +55,5 @@ The record formats are in [.open-opam/README.md](.open-opam/README.md).
 
 ## Licence
 
-MIT for the code and workflows ([LICENSE](LICENSE)), and CC0-1.0 for this
-repository's compilation of package metadata and records
-([LICENSE-metadata](LICENSE-metadata)). An author's opam file stays the
-author's.
+[CC0-1.0](LICENSE), as official opam's repository is. An author's opam file stays
+the author's.
