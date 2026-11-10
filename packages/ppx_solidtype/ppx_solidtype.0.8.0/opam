@@ -1,0 +1,38 @@
+opam-version: "2.0"
+synopsis: "The JSX lowering of solidtype: OCaml's JSX to Solid's"
+description:
+  "Lowers each JSX element MLX parses into one call Solid's compiler is handed, with every dynamic attribute, child and prop a thunk."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/solidtype"
+bug-reports: "https://github.com/hyphatech/solidtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "ppxlib" {>= "0.36.0"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/solidtype.git"
+x-maintenance-intent: ["(latest)"]
+x-open-opam: true
+x-commit-hash: "f9fbedb67c6f87fb19eb9e2f4e25884605ef1d07"
+url {
+  src: "https://github.com/hyphatech/solidtype/releases/download/0.8.0/solidtype-0.8.0.tar.gz"
+  checksum: "sha256=36deeb557e52984dc2ac4ea098eb5684e008b0fcdb316d37858bd873dacb6882"
+}
