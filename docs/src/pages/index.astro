@@ -1,0 +1,80 @@
+---
+// The front page: what the registry is, how to add it, what it holds, the
+// packages published last and the ones downloaded most.
+import Base from "../layouts/Base.astro";
+import PackageCard from "../components/PackageCard.astro";
+import * as Copy from "@islands/copy.jsx";
+import Boxes from "@lucide/astro/icons/boxes";
+import TrendingUp from "@lucide/astro/icons/trending-up";
+import Sparkles from "@lucide/astro/icons/sparkles";
+import Upload from "@lucide/astro/icons/upload";
+import Check from "@lucide/astro/icons/check";
+import { packages, repository, type Package } from "../lib/registry";
+import { gates } from "../lib/gates";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const publishing = ["open-opam init", "open-opam check 1.2.3", "open-opam publish 1.2.3"];
+const recent = packages
+  .filter((p) => p.latest.published && p.latest.state.kind === "published")
+  .sort((a, b) => (b.latest.published ?? "").localeCompare(a.latest.published ?? "") || a.name.localeCompare(b.name))
+  .slice(0, 6);
+// A package's last thirty days are its latest archive's, which its release's
+// other packages share; the package the archive is named after stands for it.
+const named = (p: Package) => (p.latest.archive?.file.startsWith(`${p.name}-`) ? 1 : 0);
+const lastThirty = (p: Package) => (p.latest.archive?.downloads?.days ?? []).reduce((n, d) => n + d.downloads, 0);
+const allTime = (p: Package) => p.latest.archive?.downloads?.total ?? 0;
+// Daily figures need two snapshots a day apart; until then, the totals rank.
+const daily = packages.some((p) => (p.latest.archive?.downloads?.days.length ?? 0) > 0);
+const measure = daily ? lastThirty : allTime;
+const seen = new Set<string>();
+const popular = packages
+  .filter((p) => p.latest.archive?.downloads !== undefined)
+  .sort((a, b) => measure(b) - measure(a) || named(b) - named(a))
+  .filter((p) => (p.latest.archive && !seen.has(p.latest.archive.url) ? (seen.add(p.latest.archive.url), true) : false))
+  .slice(0, 6);
+---
+
+<Base title="open-opam" description="An opam repository where a release is published on proof, not on review.">
+  <section class="hero">
+    <div class="hero-pitch">
+      <h1>Self-service opam repository</h1>
+      <p class="hero-lead">Open OCaml publishing for humans and agents.</p>
+      <Copy.make client:visible label="the command that adds the registry" code={`opam repo add open-opam https://github.com/${repository}.git`} />
+      <div class="hero-actions">
+        <a class="button button--primary" href={`${base}/packages/`}><Boxes size={16} />Browse packages</a>
+        <a class="button button--secondary" href={`${base}/publish/`}><Upload size={16} />Publish a release</a>
+      </div>
+    </div>
+
+    <figure class="hero-proof">
+      <div class="terminal">
+        <div class="terminal-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+        <pre><code>{publishing.map((command) => (
+          <span class="terminal-line"><span class="terminal-prompt" aria-hidden="true">$ </span>{command}</span>
+        ))}</code></pre>
+      </div>
+      <figcaption>
+        <span class="field-label">Then the registry checks</span>
+        <ol class="hero-gates">
+          {gates.map(([name]) => <li><Check size={14} aria-hidden="true" />{name}</li>)}
+        </ol>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="home-section">
+    <h2><Sparkles size={18} />Recently published</h2>
+    <div class="package-grid">
+      {recent.map((pkg) => <PackageCard pkg={pkg} />)}
+    </div>
+  </section>
+
+  {popular.length > 0 && (
+    <section class="home-section">
+      <h2><TrendingUp size={18} />{daily ? "Most downloaded, last 30 days" : "Most downloaded"}</h2>
+      <div class="package-grid">
+        {popular.map((pkg) => <PackageCard pkg={pkg} downloads={measure(pkg)} />)}
+      </div>
+    </section>
+  )}
+</Base>

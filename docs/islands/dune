@@ -1,0 +1,17 @@
+; The catalogue's interactive parts, each a Solid component written in OCaml
+; with HeroUI's components, which Astro renders with the page and then brings
+; to life in the browser.
+
+(library
+ (name islands)
+ (modes melange)
+ (libraries solidtype solidtype-kobalte solidtype-heroui melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries islands)
+ (module_systems
+  (es6 jsx)))

@@ -1,0 +1,145 @@
+(* The header's search: a field whose matches open under it as the reader
+   types, the arrows moving through them while the focus stays in the field,
+   and the one chosen opened. A package matches when every word typed is in its
+   name or synopsis. Command-K, or Control-K off Apple's systems, takes the
+   focus to it from anywhere on the page, as the key in the field says. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
+module Combo_box = Solidtype_heroui.Combo_box
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Input = Solidtype_heroui.Input
+module Kbd = Solidtype_heroui.Kbd
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+type package = { name : string; version : string; synopsis : string }
+
+external assign : string -> unit = "assign" [@@mel.scope "window", "location"]
+external platform : string = "platform" [@@mel.scope "navigator"]
+external includes : string -> string -> bool = "includes" [@@mel.send]
+external focus : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
+
+(* Only ever asked for "input", so what it finds is an input. *)
+external find_input :
+  Dom.htmlDivElement -> string -> Dom.htmlInputElement Js.Nullable.t
+  = "querySelector"
+[@@mel.send]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external meta_key : Dom.keyboardEvent -> bool = "metaKey" [@@mel.get]
+external ctrl_key : Dom.keyboardEvent -> bool = "ctrlKey" [@@mel.get]
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external add_keydown :
+  (_[@mel.as "keydown"]) -> (Dom.keyboardEvent -> unit[@u]) -> unit
+  = "addEventListener"
+[@@mel.scope "document"]
+
+external remove_keydown :
+  (_[@mel.as "keydown"]) -> (Dom.keyboardEvent -> unit[@u]) -> unit
+  = "removeEventListener"
+[@@mel.scope "document"]
+
+(* The key a shortcut is held with: Command on Apple's systems, Control on the
+   rest. The page is rendered before it is known, as Command. *)
+type modifier = Command | Control
+
+let matches (p : package) typed =
+  let text = String.lowercase_ascii (p.name ^ " " ^ p.synopsis) in
+  let holds part =
+    let n = String.length part in
+    let rec from i =
+      i + n <= String.length text
+      && (String.equal (String.sub text i n) part || from (i + 1))
+    in
+    from 0
+  in
+  String.split_on_char ' ' (String.lowercase_ascii typed)
+  |> List.filter (fun w -> not (String.equal w ""))
+  |> List.for_all holds
+
+let%component make ~(packages : package array) ~(base : string) () =
+  let by_name name =
+    Array.find_opt (fun (p : package) -> String.equal p.name name) (packages ())
+  in
+  let modifier, set_modifier = S.create_signal Command in
+  (* HeroUI's Input keeps its ref for itself, so the input is found from the
+     box around the combo box. *)
+  let box = ref None in
+  (* One function, so the listener removed is the one added. *)
+  let on_keydown =
+   fun [@u] event ->
+    let held =
+      match S.get modifier with
+      | Command -> meta_key event
+      | Control -> ctrl_key event
+    in
+    if held && String.equal (String.lowercase_ascii (key event)) "k" then (
+      prevent_default event;
+      Option.iter
+        (fun box ->
+          Option.iter focus (Js.Nullable.toOption (find_input box "input")))
+        !box)
+  in
+  S.on_mount (fun () ->
+      let apple = includes platform "Mac" || includes platform "iP" in
+      S.set set_modifier (if apple then Command else Control);
+      add_keydown on_keydown;
+      (* Inside the mount: a cleanup runs on the server too, which has no
+         document. *)
+      S.on_cleanup (fun () -> remove_keydown on_keydown));
+  <div class_="w-full" ref=(fun div -> box := Some div)>
+  <Combo_box
+    class_="w-full"
+    menu_trigger=`input
+    default_filter=(fun text typed ->
+                     match by_name text with
+                     | Some p -> matches p typed
+                     | None -> false)
+    on_change=(fun chosen ->
+                match chosen with
+                | [| name |] -> assign (base () ^ "/packages/" ^ name ^ "/")
+                | _ -> ())>
+    <Combo_box.Input_group>
+      <Input
+        aria_label="Search packages"
+        placeholder="Search packages"
+        aria_keyshortcuts=(fun () ->
+                            match S.get modifier with
+                            | Command -> "Meta+K"
+                            | Control -> "Control+K")
+      />
+      <span class_="search-shortcut" aria_hidden=true>
+        <Kbd>
+          (fun () ->
+            match S.get modifier with
+            | Command -> Jsx.element <Kbd.Abbr key_value=`command />
+            | Control -> Jsx.element <Kbd.Content>"Ctrl"</Kbd.Content>)
+          <Kbd.Content>"K"</Kbd.Content>
+        </Kbd>
+      </span>
+    </Combo_box.Input_group>
+    <Combo_box.Popover class_="w-(--trigger-width)">
+      <List_box
+        class_="max-h-[60vh] overflow-y-auto"
+        render_empty_state=(fun _ -> <Empty_state>"No package matches"</Empty_state>)>
+        <Solidtype.For each=(fun () -> packages ())>
+          (fun (p : package) _ ->
+            <List_box.Item id=(fun () -> p.name) text_value=(fun () -> p.name)>
+              <div class_="flex min-w-0 flex-col">
+                <Label class_="flex items-center gap-2">
+                  (fun () -> Jsx.string p.name)
+                  <Chip size=`sm variant=`secondary>(fun () -> Jsx.string p.version)</Chip>
+                </Label>
+                <Description class_="truncate">(fun () -> Jsx.string p.synopsis)</Description>
+              </div>
+            </List_box.Item>)
+        </Solidtype.For>
+      </List_box>
+    </Combo_box.Popover>
+  </Combo_box>
+  </div>

@@ -1,0 +1,170 @@
+(* Every package, as a list that stays usable at any size: sorted by name,
+   by when it was last published or by its downloads, and shown a page at a
+   time. Finding a package is the header's search, the site's only one. The
+   server renders the first page, sorted by name, so the list is there before
+   any code runs. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Index = Solidtype.Index
+module Chip = Solidtype_heroui.Chip
+module Pagination = Solidtype_heroui.Pagination
+module Segment = Solidtype_heroui.Segment
+module Table = Solidtype_heroui.Table
+
+type package = {
+  name : string;
+  version : string;
+  synopsis : string;
+  published : string;  (** [YYYY-MM-DD], which sorts as the date does *)
+  published_label : string;  (** the date as the page writes it *)
+  downloads : int;  (** its latest archive's, or 0 before any snapshot *)
+  href : string;
+}
+
+type order = By_name | Newest | Most_downloaded
+
+let order_of_key = function
+  | "newest" -> Newest
+  | "downloads" -> Most_downloaded
+  | _ -> By_name
+
+(* Rows on a page: enough to scan, few enough to render at once. *)
+let page_size = 50
+
+type shown = Page of int | Ellipsis
+
+(* The first and last pages, and the two beside the current one. *)
+let page_numbers ~page ~pages =
+  if pages <= 7 then List.init pages (fun i -> Page (i + 1))
+  else
+    let start = Int.max 2 (page - 1) and stop = Int.min (pages - 1) (page + 1) in
+    [ Page 1 ]
+    @ (if start > 2 then [ Ellipsis ] else [])
+    @ List.init (stop - start + 1) (fun i -> Page (start + i))
+    @ (if stop < pages - 1 then [ Ellipsis ] else [])
+    @ [ Page pages ]
+
+let compare_by order (a : package) (b : package) =
+  match order with
+  | By_name -> String.compare a.name b.name
+  | Newest -> (
+      match String.compare b.published a.published with
+      | 0 -> String.compare a.name b.name
+      | c -> c)
+  | Most_downloaded -> (
+      match Int.compare b.downloads a.downloads with
+      | 0 -> String.compare a.name b.name
+      | c -> c)
+
+let%component make ~(packages : package array) () =
+  let order, set_order = S.create_signal By_name in
+  let page, set_page = S.create_signal 1 in
+  let sorted () =
+    let all = Array.copy (packages ()) in
+    Array.stable_sort (compare_by (S.get order)) all;
+    all
+  in
+  let pages () = Int.max 1 ((Array.length (sorted ()) + page_size - 1) / page_size) in
+  let shown () =
+    let all = sorted () in
+    let first = (S.get page - 1) * page_size in
+    let n = Int.max 0 (Int.min page_size (Array.length all - first)) in
+    Array.sub all first n
+  in
+  <div class_="package-list">
+    <div class_="package-list-controls">
+      <Segment
+        aria_label="Sort"
+        default_selected_key="name"
+        on_selection_change=(fun key ->
+                              S.set set_order (order_of_key key);
+                              S.set set_page 1)>
+        <Segment.Item id="name">"Name"</Segment.Item>
+        <Segment.Item id="newest">"Newest"</Segment.Item>
+        <Segment.Item id="downloads">"Most downloaded"</Segment.Item>
+      </Segment>
+    </div>
+    <Table>
+      <Table.Scroll_container>
+        <Table.Content aria_label="Packages">
+          <Table.Header>
+            <Table.Column>"Package"</Table.Column>
+            <Table.Column>"Version"</Table.Column>
+            <Table.Column>"Description"</Table.Column>
+            <Table.Column>"Published"</Table.Column>
+            <Table.Column>"Downloads"</Table.Column>
+          </Table.Header>
+          <Table.Body>
+            <Solidtype.For each=(fun () -> shown ())>
+              (fun (p : package) _ ->
+                <Table.Row>
+                  <Table.Cell>
+                    <a class_="package-list-name" href=(fun () -> p.href)>(fun () -> Jsx.string p.name)</a>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Chip size=`sm variant=`secondary>(fun () -> Jsx.string p.version)</Chip>
+                  </Table.Cell>
+                  <Table.Cell><span class_="package-list-synopsis">(fun () -> Jsx.string p.synopsis)</span></Table.Cell>
+                  <Table.Cell><span class_="whitespace-nowrap">(fun () -> Jsx.string p.published_label)</span></Table.Cell>
+                  <Table.Cell>
+                    <span class_="package-list-downloads">
+                      <svg fill="none" view_box="0 0 24 24" aria_hidden=true>
+                        <path
+                          d="M12 15V3M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5"
+                          stroke="currentColor" stroke_width="2" stroke_linecap="round"
+                          stroke_linejoin="round"
+                        />
+                      </svg>
+                      (fun () -> Jsx.int p.downloads)
+                    </span>
+                  </Table.Cell>
+                </Table.Row>)
+            </Solidtype.For>
+          </Table.Body>
+        </Table.Content>
+      </Table.Scroll_container>
+    </Table>
+    <Pagination class_="package-list-pages">
+      <Pagination.Summary>
+        (fun () ->
+          let total = Array.length (sorted ()) in
+          let first = if total = 0 then 0 else ((S.get page - 1) * page_size) + 1 in
+          let last = Int.min (S.get page * page_size) total in
+          Jsx.string
+            (string_of_int first ^ "-" ^ string_of_int last ^ " of "
+           ^ string_of_int total ^ " packages"))
+      </Pagination.Summary>
+      <Pagination.Content>
+        <Pagination.Item>
+          <Pagination.Previous
+            is_disabled=(fun () -> S.get page = 1)
+            on_press=(fun () -> S.update set_page pred)>
+            <Pagination.Previous_icon />
+          </Pagination.Previous>
+        </Pagination.Item>
+        <Index each=(fun () -> Array.of_list (page_numbers ~page:(S.get page) ~pages:(pages ())))>
+          (fun shown _ ->
+            <Pagination.Item>
+              (fun () ->
+                match S.get shown with
+                | Ellipsis -> Jsx.element <Pagination.Ellipsis />
+                | Page p ->
+                    Jsx.element
+                      <Pagination.Link
+                        is_active=(fun () -> p = S.get page)
+                        on_press=(fun () -> S.set set_page p)>
+                        (fun () -> Jsx.int p)
+                      </Pagination.Link>)
+            </Pagination.Item>)
+        </Index>
+        <Pagination.Item>
+          <Pagination.Next
+            is_disabled=(fun () -> S.get page >= pages ())
+            on_press=(fun () -> S.update set_page succ)>
+            <Pagination.Next_icon />
+          </Pagination.Next>
+        </Pagination.Item>
+      </Pagination.Content>
+    </Pagination>
+  </div>

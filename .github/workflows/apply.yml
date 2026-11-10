@@ -1,0 +1,57 @@
+# Makes each opam file match its records: a version with a revocation and no
+# restoration is unavailable, and a restored one holds the bytes it was published
+# with. A pull request only adds records, so an author's fork never carries this
+# edit; the registry makes it, in a pull request of its own, validated like any.
+# It runs on a schedule, since a merge made with the workflow token, as
+# auto-merge's is, starts no workflow; making a file match twice changes nothing.
+name: apply
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: apply
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          # A restoration reads the bytes a version was published with from history.
+          fetch-depth: 0
+      - name: Make each opam file match its records
+        run: |
+          if [ -n "$(gh pr list -R "$REPO" --head apply --state open --json number --jq '.[].number')" ]; then
+            echo "The last change is still waiting to merge."; exit 0
+          fi
+          for record in .open-opam/revocations/*.json .open-opam/restorations/*.json; do
+            [ -f "$record" ] || continue
+            case "$record" in
+              .open-opam/revocations/*)
+                [ -f ".open-opam/restorations/$(basename "$record")" ] && continue ;;
+            esac
+            .github/scripts/apply-record.sh "$record"
+          done
+          if git diff --quiet; then exit 0; fi
+          title="Apply $(git diff --name-only | cut -d/ -f3 | paste -sd' ' -)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c apply
+          git commit -qam "$title"
+          git push -q --force origin apply
+          url=$(gh pr create --base main --head apply --title "$title" --body "Makes the opam files match their records.")
+          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)"
+          gh pr merge "${url##*/}" --auto --squash --delete-branch -R "$REPO"

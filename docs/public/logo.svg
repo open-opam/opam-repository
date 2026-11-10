@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img" aria-label="open-opam">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8c0a"/><stop offset="1" stop-color="#f88208"/></linearGradient>
+    <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa23a"/><stop offset="1" stop-color="#ff9a2c"/></linearGradient>
+    <linearGradient id="bot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#df6912"/><stop offset="1" stop-color="#c9580c"/></linearGradient>
+  </defs>
+  <g fill="none" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="url(#top)" d="M46.8 95.2Q30.0 86.0 46.8 76.8L133.2 29.2Q150.0 20.0 166.8 29.2L253.2 76.8Q270.0 86.0 253.2 95.2L166.8 142.8Q150.0 152.0 133.2 142.8Z"/>
+    <path stroke="url(#mid)" d="M30.0 148.0L133.2 204.8Q150.0 214.0 166.8 204.8L270.0 148.0"/>
+    <path stroke="url(#bot)" d="M30.0 210.0L133.2 266.8Q150.0 276.0 166.8 266.8L270.0 210.0"/>
+  </g>
+</svg>
+

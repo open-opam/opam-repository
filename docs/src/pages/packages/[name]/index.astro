@@ -1,0 +1,13 @@
+---
+// A package's own address shows its latest version.
+import PackagePage from "../../../components/PackagePage.astro";
+import { packages } from "../../../lib/registry";
+
+export function getStaticPaths() {
+  return packages.map((pkg) => ({ params: { name: pkg.name }, props: { pkg } }));
+}
+
+const { pkg } = Astro.props;
+---
+
+<PackagePage pkg={pkg} version={pkg.latest} />

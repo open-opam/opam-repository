@@ -1,0 +1,47 @@
+# Once a day, each archive's download count from GitHub, saved as one snapshot
+# on the stats branch, never on main: main's history records publications. The
+# catalogue shows a day's downloads as the difference of two snapshots.
+name: stats
+
+on:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: stats
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: oven-sh/setup-bun@v2
+      # Only Bun's packages: this job can push, so it builds no package.
+      - run: make docs/node_modules
+      - run: make --silent stats > "$RUNNER_TEMP/snapshot.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Save it on the stats branch
+        run: |
+          day=$(date -u +%F)
+          if git fetch --depth=1 origin stats; then
+            git switch --discard-changes -C stats FETCH_HEAD
+          else
+            git switch --orphan stats
+          fi
+          mkdir -p stats
+          cp "$RUNNER_TEMP/snapshot.json" "stats/$day.json"
+          git add stats
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Count downloads on $day"
+          git push origin stats

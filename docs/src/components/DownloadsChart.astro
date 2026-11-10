@@ -1,0 +1,68 @@
+---
+// An archive's downloads per day, one series, so no legend: the card's title
+// names it. Each day is a hover target wider than its point, and the same
+// figures are a table for a screen reader.
+import type { Day } from "../lib/registry";
+
+interface Props {
+  days: Day[];
+}
+
+const { days } = Astro.props;
+const width = 300;
+const height = 80;
+const max = Math.max(1, ...days.map((d) => d.downloads));
+const step = days.length > 1 ? width / (days.length - 1) : 0;
+const points = days.map((d, i) => ({ ...d, x: days.length > 1 ? i * step : width / 2, y: height - (d.downloads / max) * height }));
+const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+const area = points.length > 0 ? `${line} L${points.at(-1)!.x.toFixed(1)},${height} L${points[0].x.toFixed(1)},${height} Z` : "";
+const label = (d: Day) =>
+  `${new Date(`${d.date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}: ${d.downloads.toLocaleString("en-GB")}`;
+---
+
+<div class="chart" data-chart>
+  <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
+    <line class="base" x1="0" y1={height} x2={width} y2={height}></line>
+    {points.length > 1 && <path class="area" d={area}></path>}
+    {points.length > 1 && <path class="line" d={line}></path>}
+    <line class="cross" x1="0" y1="0" x2="0" y2={height} visibility="hidden"></line>
+    {points.map((p) => (
+      <rect class="hit" x={Math.max(0, p.x - step / 2)} y="0" width={step || width} height={height} data-x={p.x} data-label={label(p)}>
+        <title>{label(p)}</title>
+      </rect>
+    ))}
+  </svg>
+  <div class="tip" hidden></div>
+  <div class="axis" aria-hidden="true">
+    <span>{days[0] && label(days[0]).split(":")[0]}</span>
+    <span>peak {max.toLocaleString("en-GB")} a day</span>
+    <span>{days.at(-1) && label(days.at(-1)!).split(":")[0]}</span>
+  </div>
+  <table class="sr-only">
+    <caption>Downloads per day</caption>
+    <tbody>{days.map((d) => <tr><th scope="row">{d.date}</th><td>{d.downloads}</td></tr>)}</tbody>
+  </table>
+</div>
+
+<script>
+  for (const chart of document.querySelectorAll<HTMLElement>("[data-chart]")) {
+    const svg = chart.querySelector("svg")!;
+    const cross = chart.querySelector<SVGLineElement>(".cross")!;
+    const tip = chart.querySelector<HTMLElement>(".tip")!;
+    for (const hit of chart.querySelectorAll<SVGRectElement>(".hit")) {
+      hit.addEventListener("pointerenter", () => {
+        const x = Number(hit.dataset.x);
+        cross.setAttribute("x1", String(x));
+        cross.setAttribute("x2", String(x));
+        cross.setAttribute("visibility", "visible");
+        tip.textContent = hit.dataset.label ?? "";
+        tip.style.left = `${(x / svg.viewBox.baseVal.width) * 100}%`;
+        tip.hidden = false;
+      });
+    }
+    svg.addEventListener("pointerleave", () => {
+      cross.setAttribute("visibility", "hidden");
+      tip.hidden = true;
+    });
+  }
+</script>

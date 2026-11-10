@@ -1,0 +1,40 @@
+(* The version picker beside a package's name: every version, newest first,
+   each opening its own page. *)
+
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Chip = Solidtype_heroui.Chip
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+
+type version = { version : string; revoked : bool; href : string }
+
+external assign : string -> unit = "assign" [@@mel.scope "window", "location"]
+
+let%component make ~(current : string) ~(versions : version array) () =
+  <Dropdown>
+    <Button aria_label="Choose a version" size=`sm variant=`secondary>
+      (fun () -> Jsx.string (current ())) " ▾"
+    </Button>
+    <Dropdown.Popover class_="max-h-80 overflow-y-auto">
+      <Dropdown.Menu
+        on_action=(fun id ->
+                    match
+                      Array.find_opt
+                        (fun (v : version) -> String.equal v.version id)
+                        (versions ())
+                    with
+                    | Some v -> assign v.href
+                    | None -> ())>
+        <Solidtype.For each=(fun () -> versions ())>
+          (fun (v : version) _ ->
+            <Dropdown.Item id=(fun () -> v.version) text_value=(fun () -> v.version)>
+              <Label class_="font-mono">(fun () -> Jsx.string v.version)</Label>
+              <Solidtype.Show when_=(fun () -> v.revoked)>
+                <Chip size=`sm color=`danger>"revoked"</Chip>
+              </Solidtype.Show>
+            </Dropdown.Item>)
+        </Solidtype.For>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>

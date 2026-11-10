@@ -1,0 +1,286 @@
+/* The catalogue's look is HeroUI's: its components' classes, its tokens, and
+   its themes, with the catalogue's own, OCaml's, in themes/ocaml.css: a light
+   block and a dark one, which the layout chooses from the system's setting
+   before the page paints. This file only lays the pages out, in those tokens. */
+
+@layer theme, base, components, utilities;
+
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "tw-animate-css";
+
+@import "./themes/ocaml.css" layer(theme);
+
+/* The islands' classes are in the JavaScript Melange writes under _build,
+   which Tailwind skips as ignored unless told. */
+@source "../../_build/default/islands/out/islands";
+/* Some of HeroUI's ports, the segment among them, are styled by utilities
+   written in the port's own JavaScript, which Melange writes there too. */
+@source "../../_build/default/islands/out/node_modules/solidtype-heroui";
+
+:root {
+  --page: 76rem;
+  --gutter: 1rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+a:not(.button):not(.card-link) { color: var(--link); }
+a:not(.button):not(.card-link):hover { text-decoration: underline; }
+code, pre, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.wrap { max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* Header and footer */
+.site-header {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--separator);
+}
+.site-header .wrap { display: flex; align-items: center; gap: 1rem; min-height: 4rem; padding-block: 0.5rem; }
+.brand { display: inline-flex; align-items: center; gap: 0.55rem; font-weight: 700; font-size: 1.1rem; color: var(--foreground) !important; text-decoration: none !important; white-space: nowrap; }
+.brand-mark { width: 2rem; height: 2rem; }
+.site-search { flex: 1 1 auto; max-width: 30rem; min-width: 0; }
+.site-search .combo-box__input-group { position: relative; }
+.site-search .input { padding-right: 3.75rem; }
+.search-shortcut { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); display: flex; pointer-events: none; }
+.site-search .combo-box__input-group:focus-within .search-shortcut { display: none; }
+@media (max-width: 40rem) { .search-shortcut { display: none; } .site-search .input { padding-right: 0.75rem; } }
+.site-nav { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; }
+@media (max-width: 40rem) { .site-nav .nav-text { display: none; } }
+.site-footer { border-top: 1px solid var(--separator); margin-top: 3.5rem; padding: 2rem 0 3rem; color: var(--muted); font-size: 0.9rem; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.site-footer nav a { color: var(--muted) !important; }
+
+/* A line to copy */
+.copy {
+  display: flex; align-items: center; gap: 0.25rem; min-width: 0;
+  border: 1px solid var(--border); border-radius: calc(var(--radius) * 1.5);
+  background: var(--surface-secondary); padding: 0.2rem 0.25rem 0.2rem 0.75rem; margin: 0.35rem 0 0.9rem;
+}
+.copy code { flex: 1; min-width: 0; overflow-x: auto; white-space: pre; font-size: 0.82rem; padding: 0.35rem 0; scrollbar-width: none; }
+.field-label { display: block; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+
+/* Home */
+.hero {
+  position: relative; isolation: isolate; padding: 4rem 0 1.5rem;
+  display: grid; gap: 2.5rem; align-items: center;
+}
+@media (min-width: 64rem) { .hero { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 3.5rem; } }
+/* The glow spans the window, and html and body clip it there, so it never
+   makes the page scroll sideways. */
+.hero::before {
+  content: ""; position: absolute; inset: -4rem -50vw 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(40rem 18rem at 30% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
+    radial-gradient(30rem 18rem at 75% 40%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 70%);
+}
+html, body { overflow-x: clip; }
+.hero-pitch { min-width: 0; }
+.hero h1 { font-size: clamp(2.2rem, 4.6vw, 3.4rem); line-height: 1.08; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 1.1rem; }
+.hero-lead { color: var(--muted); font-size: 1.1rem; line-height: 1.55; max-width: 34rem; margin: 0 0 1.5rem; }
+.hero .copy { max-width: 36rem; background: var(--surface); }
+/* The whole command shows on a narrow screen: it wraps at a space. */
+.hero .copy code { white-space: pre-wrap; }
+.hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+
+.hero-proof {
+  min-width: 0; margin: 0; padding: 1rem; border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 2.5); background: color-mix(in oklab, var(--surface) 70%, transparent);
+  box-shadow: 0 1.5rem 3rem -1.5rem color-mix(in oklab, black 45%, transparent);
+}
+.terminal { border-radius: calc(var(--radius) * 1.5); background: var(--surface-secondary); overflow: hidden; }
+.terminal-bar { display: flex; gap: 0.4rem; padding: 0.7rem 0.85rem 0; }
+.terminal-bar span { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--border); }
+.terminal pre { margin: 0; padding: 0.75rem 1rem 1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.9; scrollbar-width: none; }
+.terminal-line { display: block; white-space: pre-wrap; padding-left: 2ch; text-indent: -2ch; }
+.terminal-prompt { color: var(--accent); user-select: none; }
+.hero-proof figcaption { padding: 1.1rem 0.4rem 0.2rem; }
+.hero-gates { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem 1rem; font-size: 0.92rem; }
+.hero-gates li { display: flex; align-items: center; gap: 0.5rem; }
+.hero-gates svg { flex: none; color: var(--success); }
+.home-section { margin-top: 2.25rem; }
+.home-section h2, .page-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; }
+.home-section h2 { font-size: 1.25rem; margin: 0 0 1rem; }
+.home-section h2 svg, .page-title svg { color: var(--accent); }
+.page-title { font-size: 2rem; margin: 2.5rem 0 1.25rem; }
+
+/* Package cards */
+.package-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 1rem; }
+.card-link { display: flex; flex-direction: column; gap: 0.5rem; padding: 1.1rem 1.2rem; color: inherit; text-decoration: none; transition: transform 120ms ease, border-color 120ms ease; border: 1px solid transparent; }
+.card-link:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--accent) 40%, transparent); }
+.package-card-head { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.package-card-head strong { font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.package-icon { flex: none; display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 0.6rem; background: var(--accent-soft); color: var(--accent-soft-foreground); }
+.package-card-synopsis { color: var(--muted); font-size: 0.92rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.package-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 1rem; color: var(--muted); font-size: 0.8rem; margin-top: auto; }
+
+/* A package */
+.crumb { margin: 2rem 0 0.75rem; font-size: 0.9rem; }
+.crumb a { display: inline-flex; align-items: center; gap: 0.3rem; }
+.package-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.package-head > div { min-width: 0; }
+.package-title { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.5rem; }
+.package-title h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.01em; margin: 0; }
+.package-head .synopsis { color: var(--muted); margin: 0; max-width: 46rem; font-size: 1.05rem; }
+.notice-line { color: var(--foreground); }
+.notice-line .link { margin-left: 0.25rem; }
+.notices { display: grid; gap: 0.75rem; margin-top: 1.25rem; }
+.package-body { margin-top: 1.5rem; display: grid; grid-template-columns: minmax(0, 1fr) 21rem; gap: 1.5rem; align-items: start; }
+@media (max-width: 60rem) { .package-body { grid-template-columns: minmax(0, 1fr); } }
+.package-body > * { min-width: 0; }
+.side { display: grid; gap: 1rem; min-width: 0; }
+.side .card { min-width: 0; }
+.side h2 { display: flex; align-items: center; gap: 0.45rem; font-size: 0.95rem; font-weight: 650; margin: 0 0 0.75rem; }
+.side h2 svg { color: var(--accent); }
+
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; margin: 0; }
+.facts div { min-width: 0; }
+.facts dt { font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0.15rem 0 0; overflow-wrap: anywhere; }
+.facts .wide { grid-column: 1 / -1; }
+.facts .number { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.links a { display: inline-flex; align-items: center; gap: 0.5rem; overflow-wrap: anywhere; }
+.side-note { color: var(--muted); font-size: 0.8rem; margin: 0.6rem 0 0; }
+.empty { color: var(--muted); }
+
+
+/* A README, as GitHub's sanitiser leaves it, its code coloured by Shiki in
+   both themes. */
+.readme.card { display: block; padding: 1.5rem 1.75rem; overflow-wrap: anywhere; line-height: 1.6; }
+.readme.document { max-width: 52rem; margin-top: 2.5rem; padding: 2rem 2.25rem; }
+@media (max-width: 40rem) { .readme { padding: 1rem; } .package-title h1 { font-size: 1.6rem; } }
+.readme > :first-child { margin-top: 0; }
+.readme > :last-child { margin-bottom: 0; }
+.readme h1, .readme h2, .readme h3 { font-weight: 700; line-height: 1.25; margin: 1.25em 0 0.5em; }
+.readme h1 { font-size: 1.8rem; }
+.readme h2 { font-size: 1.4rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--separator); }
+.readme h3 { font-size: 1.15rem; }
+.readme p, .readme ul, .readme ol, .readme pre, .readme table, .readme blockquote { margin: 0 0 0.85rem; }
+.readme ul, .readme ol { padding-left: 1.5rem; }
+.readme ul { list-style: disc; }
+.readme ol { list-style: decimal; }
+.readme li + li { margin-top: 0.25rem; }
+.readme img { display: inline; max-width: 100%; height: auto; }
+.readme pre { background: var(--surface-secondary) !important; border: 1px solid var(--border); border-radius: calc(var(--radius) * 1.5); padding: 1rem 1.1rem; overflow-x: auto; font-size: 0.86rem; line-height: 1.55; }
+.readme :not(pre) > code { background: var(--surface-secondary); border-radius: 0.35rem; padding: 0.1rem 0.35rem; font-size: 0.88em; }
+.readme table { border-collapse: collapse; display: block; overflow-x: auto; }
+.readme th, .readme td { border: 1px solid var(--border); padding: 0.4rem 0.7rem; }
+.readme blockquote { padding: 0 1rem; color: var(--muted); border-left: 3px solid var(--border); }
+.readme a { color: var(--link) !important; }
+.readme .shiki span { color: var(--shiki-light); }
+.dark .readme .shiki span { color: var(--shiki-dark); }
+
+/* The downloads chart */
+.chart { position: relative; margin: 0.25rem 0 0.9rem; }
+.chart svg { display: block; width: 100%; height: 5.5rem; overflow: visible; }
+.chart .area { fill: color-mix(in oklab, var(--accent) 16%, transparent); }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.chart .base { stroke: var(--separator); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart .hit { fill: transparent; }
+.chart .cross { stroke: var(--muted); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart .axis { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.72rem; margin-top: 0.25rem; }
+.chart .tip {
+  position: absolute; top: -0.25rem; transform: translate(-50%, -100%); pointer-events: none;
+  background: var(--foreground); color: var(--background); font-size: 0.75rem; padding: 0.2rem 0.45rem; border-radius: 0.4rem; white-space: nowrap;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.optional { margin-top: 1.25rem; }
+
+
+/* Publish */
+.lead { color: var(--muted); font-size: 1.1rem; max-width: 46rem; margin: -0.5rem 0 1.25rem; }
+.doc-section { margin-top: 2.25rem; max-width: 52rem; }
+.doc-section h2 { display: flex; align-items: center; gap: 0.5rem; font-size: 1.35rem; font-weight: 700; margin: 0 0 0.85rem; }
+.doc-section h2 svg { color: var(--accent); }
+.doc-section p { line-height: 1.6; margin: 0.75rem 0; }
+.doc-section :not(pre) > code { background: var(--surface-secondary); border-radius: 0.35rem; padding: 0.1rem 0.35rem; font-size: 0.88em; }
+.doc-section .copy { align-items: flex-start; }
+.command { display: block; padding: 1.1rem 1.25rem; margin-top: 0.85rem; }
+.command h3 { font-size: 1.05rem; font-weight: 650; margin: 0 0 0.35rem; }
+.command .usage { background: var(--surface-secondary); border-radius: calc(var(--radius) * 1.5); padding: 0.6rem 0.8rem; overflow-x: auto; font-size: 0.85rem; margin: 0.6rem 0; }
+.options { display: grid; grid-template-columns: max-content 1fr; gap: 0.45rem 1rem; margin: 0.5rem 0 0; font-size: 0.92rem; }
+.options dd { margin: 0; color: var(--muted); }
+
+/* In the search's popover the highlighted match is the field's virtual focus,
+   not the page's: it is tinted as a hovered item is, since the focus ring is
+   the field's, and a ring there is cut by the popover's edge. */
+.combo-box__popover [role="option"][data-focus-visible="true"] {
+  outline: none;
+  box-shadow: none;
+  background: var(--default);
+}
+.notice-line { display: inline-flex; align-items: center; gap: 0.5rem; }
+.notice-line svg { color: var(--accent); flex: none; }
+
+.package-card-meta > span { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+/* The copy button: its copy icon gives way to a check, scaled and faded, in
+   HeroUI's success colour, and the button gives a small bounce as it copies.
+   With reduced motion the icons swap without moving. */
+.copy-button { position: relative; flex: none; color: var(--muted); }
+.copy-button:hover { color: var(--foreground); }
+.copy-button svg { position: absolute; inset: 0; margin: auto; width: 1rem; height: 1rem; transition: opacity 180ms ease, transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.copy-button .check-icon { opacity: 0; transform: scale(0.4) rotate(-20deg); color: var(--success); }
+.copy-button.copied .copy-icon { opacity: 0; transform: scale(0.4); }
+.copy-button.copied .check-icon { opacity: 1; transform: scale(1) rotate(0); }
+.copy-button.copied { animation: copied-bounce 320ms ease-out; background: color-mix(in oklab, var(--success) 14%, transparent); }
+@keyframes copied-bounce { 0% { transform: scale(1); } 40% { transform: scale(0.88); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .copy-button svg { transition: opacity 120ms linear; transform: none !important; }
+  .copy-button.copied { animation: none; }
+}
+
+.report-link { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid var(--separator); width: 100%; font-size: 0.82rem; color: var(--muted) !important; }
+.report-link:hover { color: var(--danger) !important; }
+
+/* The trail's last step is the page itself: text, not a link. */
+.crumb .breadcrumbs__item:last-child .breadcrumbs__link { color: var(--foreground); pointer-events: none; }
+
+/* Popovers are drawn in a portal at the end of the page, and the sticky
+   header (z-index 40) would cover one that opens under it: every positioner
+   sits above the header. */
+[data-popper-positioner] { z-index: 50 !important; }
+
+/* All packages */
+.package-list { display: grid; gap: 1rem; }
+.package-list-controls { display: flex; justify-content: flex-end; }
+/* The packages page puts its title and the sort on one row: the list's own
+   box gives way, so its controls join the title's row and the table and the
+   pages take full rows below; on a narrow screen the sort wraps under it. */
+.package-index { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; }
+.package-index .page-title { margin: 0; }
+.package-index .package-list { display: contents; }
+.package-index .package-list > :not(.package-list-controls) { flex: 1 0 100%; min-width: 0; }
+.package-list-name { font-weight: 600; }
+.package-list-synopsis { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.package-list-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }
+
+/* Publish: the text, and beside it the sections, the one in view marked. */
+.doc-layout { display: grid; grid-template-columns: minmax(0, 1fr) 14rem; gap: 3rem; align-items: start; margin-top: 2.5rem; }
+.doc-layout .page-title { margin-top: 0; }
+.doc-layout .alert { margin-bottom: 0.5rem; }
+@media (max-width: 60rem) { .doc-layout { grid-template-columns: minmax(0, 1fr); } .on-this-page { display: none; } }
+.on-this-page { position: sticky; top: 5.5rem; display: grid; gap: 0.15rem; font-size: 0.88rem; }
+.on-this-page .field-label { margin-bottom: 0.5rem; }
+.on-this-page a { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.75rem; border-left: 2px solid var(--separator); color: var(--muted) !important; text-decoration: none !important; transition: color 120ms ease, border-color 120ms ease; }
+.on-this-page a:hover { color: var(--foreground) !important; }
+.on-this-page a[aria-current="true"] { color: var(--link) !important; border-left-color: var(--accent); }
+.on-this-page a svg { flex: none; opacity: 0.8; }
+.doc-section { scroll-margin-top: 5.5rem; }
+.doc-layout .doc-section:first-child { margin-top: 0; }
+
+.facts .with-icon { display: inline-flex; align-items: center; gap: 0.4rem; }
+.facts .with-icon svg { color: var(--muted); }
+.package-list-downloads { display: inline-flex; align-items: center; gap: 0.4rem; font-variant-numeric: tabular-nums; }
+.package-list-downloads svg { width: 0.95rem; height: 0.95rem; color: var(--muted); }
+
+/* Tailwind's base draws an svg as a block; an icon inside a link in running
+   text stays on the link's line. */
+.doc-section p a, .side-note a { display: inline-flex; align-items: center; gap: 0.3rem; vertical-align: baseline; }

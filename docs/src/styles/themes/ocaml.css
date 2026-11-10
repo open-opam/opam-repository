@@ -1,0 +1,55 @@
+/* The catalogue's theme, OCaml's colours: its camel's orange is the accent,
+   and HeroUI's cool blue-grey neutrals are warmed towards it, as ocaml.org's
+   are. Only hues change; each lightness stays HeroUI's, so its contrasts
+   hold. A pair of blocks, as HeroUI's theming page writes one; site.css
+   imports it into the theme layer, and the layout sets data-theme to one of
+   them beside HeroUI's own .dark class, which its dark: variant reads. Each
+   block sets only what it changes; the rest is HeroUI's default theme. */
+
+@layer base {
+  /* OCaml light */
+  [data-theme="ocaml"] {
+    color-scheme: light;
+
+    --accent: oklch(0.64 0.17 45);
+    --accent-foreground: var(--snow);
+    --eclipse: oklch(0.21 0.008 50);
+
+    --background: oklch(0.975 0.004 70);
+    --surface-secondary: oklch(0.955 0.005 70);
+    --surface-tertiary: oklch(0.94 0.006 70);
+    --muted: oklch(0.55 0.018 50);
+    --default: oklch(0.94 0.006 70);
+    --field-foreground: var(--eclipse);
+    --border: oklch(0.9 0.008 60);
+    --separator: oklch(0.92 0.007 60);
+
+    /* HeroUI's links take --link, the text's colour; here a link is the
+       accent, deepened on the light background so its text is legible. */
+    --link: color-mix(in oklab, var(--accent) 80%, var(--black));
+  }
+
+  /* OCaml dark */
+  [data-theme="ocaml-dark"] {
+    color-scheme: dark;
+
+    --accent: oklch(0.64 0.17 45);
+    --accent-foreground: var(--snow);
+    --eclipse: oklch(0.21 0.008 50);
+
+    --background: oklch(0.15 0.006 50);
+    --surface: oklch(0.21 0.008 50);
+    --surface-secondary: oklch(0.257 0.009 50);
+    --surface-tertiary: oklch(0.272 0.01 50);
+    --overlay: oklch(0.21 0.008 50);
+    --muted: oklch(0.705 0.018 60);
+    --default: oklch(0.274 0.01 50);
+    --field-background: oklch(0.21 0.008 50);
+    --segment: oklch(0.396 0.014 50);
+    --border: oklch(0.28 0.01 50);
+    --separator: oklch(0.25 0.009 50);
+
+    /* The accent, lightened on the dark background. */
+    --link: oklch(0.72 0.16 50);
+  }
+}

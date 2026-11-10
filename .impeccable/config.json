@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "docs/src/styles/site.css"
+        ],
+        "createdAt": "2026-11-09T16:38:24.594Z",
+        "reason": "Claude triage: site.css:182 is the neutral 3px quote bar on a rendered README blockquote, as GitHub draws a Markdown blockquote, not an accent on a card; it predates this session"
+      }
+    ]
+  }
+}

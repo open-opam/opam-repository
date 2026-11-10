@@ -1,0 +1,90 @@
+# AGENTS.md
+
+This repository is the open-opam registry. The
+gates and the author's command are in `open-opam/open-opam-cli`. This file is for anyone changing it, human or
+agent. Users start at [README.md](README.md).
+
+## Layout
+
+```
+repo                                   the repository's opam configuration
+packages/<name>/<name>.<version>/opam  one published version of a package
+.open-opam/owners/<name>.json          the repository that owns a name
+.open-opam/revocations/                a record for each revoked version
+.open-opam/restorations/               a record for each version its author restored
+.github/workflows/pr                   lets a first-time contributor be validated
+.github/workflows/validate             every gate, on one exact commit
+.github/workflows/revoke               the maintainer's revocation: adds its records
+.github/workflows/apply                makes each opam file match its records
+.github/scripts/apply-record.sh        one record applied: available: false, or the published bytes back
+.github/actions/install-cli            the exact CLI release the registry runs
+.github/workflows/docs                 the catalogue on GitHub Pages: on a push to main, after a snapshot, and after an auto-merge
+.github/workflows/stats                each archive's downloads, once a day, onto the stats branch
+docs/                                  the catalogue: Astro, reading packages/, .open-opam/, the registry's documents, GitHub releases and the stats branch
+docs/islands/                          its interactive parts: OCaml with solidtype and HeroUI, compiled by Melange
+docs/stats.ts                          one day's download snapshot, as stats.yml saves it
+stats/<date>.json                      on the stats branch only: that day's totals, by archive address
+Makefile                               make setup, then make docs builds the catalogue into _build/docs; make test tests apply-record.sh; make stats prints a snapshot
+```
+
+opam reads `repo` and `packages/`, and ignores everything else. It is served
+from git, so nothing is generated: `opam update` reads the tree at `main`. The
+catalogue is built from that tree on each push and deployed to Pages; nothing it
+builds is committed. A day's downloads are the difference of two snapshots, since
+GitHub counts each release asset since it was uploaded.
+
+## Rules that must hold
+
+- **A pull request only adds files**: a release's opam files and owners records,
+  or revocation and restoration records. `apply` makes the opam files match the
+  records, on a schedule. Why: an author's fork is usually behind, and GitHub
+  refuses to bring it up to date without a permission an author should never
+  need; and a merge made with the workflow token, as auto-merge's is, starts no
+  workflow. Symptom: a fork's pull request that changes an existing file.
+
+- **A published version never changes.** Its opam file stays as published; a
+  correction is a new version. The one change is `apply`'s, making it match its
+  records. Why: a change under the same version cannot be
+  told from a supply-chain attack. Symptom: a diff to an existing
+  `<name>.<version>/opam`.
+- **Nothing is deleted.** A version that must not be installed is revoked with
+  `available: false` and a record. Why: it keeps the history and what other
+  packages resolve against. Symptom: a removed version directory.
+- **A package's identity is its numeric GitHub repository ID.** The repository
+  string in an owners record is a display name. Why: names and owners change,
+  the ID does not, and a mirror cannot claim it. Symptom: an owners record
+  whose ID is not the repository's `id` from GitHub's API.
+- **No archive is hosted here.** Why: a distributor's obligations are a
+  different product. Symptom: anything under `packages/` but an `opam` file.
+- **The first packages came in once, byte for byte, from the repository that
+  published them.** They predate immutable releases, so this is the only way
+  they arrive; their checksums pin their archives. Why: anything else would mean
+  a second way in. Symptom: another version added without its release.
+- **The validator is the exact release `install-cli` names, never anything from a
+  pull request, and no privileged job checks out or runs a pull request's code.**
+  Why: a submission must not be able to weaken its own gate, and a write token must
+  never share a job with untrusted code. Symptom: `pull_request_target` beside a
+  checkout, or a validator built from the change.
+- **No job relies on the install job.** Package code controls it, so it restores no
+  cache, nothing reads an artifact from it, and `report` reads only job results.
+  Why: a passing install says only that a willing package installed. Symptom: a
+  cache, an artifact, or a log line used for a decision.
+- **Download snapshots are written only to the `stats` branch.** Why: `main`'s
+  history records publications, and no scheduled job writes to it. Symptom: a
+  commit on `main` touching `stats/`, or `stats.yml` checking out anything but
+  the `stats` branch to commit.
+- **Author text in the catalogue is escaped, and only a README is rendered,
+  sanitised as GitHub sanitises one.** Why: it is untrusted input shown on the
+  registry's own address. Symptom: `set:html` on anything but
+  `renderReadme`'s output, or a README rendered without `rehype-sanitize`.
+- **A download count is the archive's, and says so.** Why: every package of a
+  release shares its archive, and GitHub counts the asset. Symptom: a count
+  shown without the archive's name, or added up across a release's packages.
+- **The catalogue is built with solidtype as this registry publishes it, in a
+  job that holds only a read token.** Its islands install solidtype from the
+  registry, which runs a package's build; the token that publishes Pages is in
+  a deploy job that runs nothing else, and no catalogue job restores a cache.
+  Why: package code never shares a job with a token that can publish, and a
+  cache is something a job running package code could have written. Symptom:
+  `pages: write` or `id-token: write` on the job that runs `make setup`, or a
+  cache action in `docs.yml` or `stats.yml`.

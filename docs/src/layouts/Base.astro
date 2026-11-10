@@ -1,0 +1,65 @@
+---
+// Every page's frame: the header with the search island, and the footer with
+// the registry's own documents. The theme, OCaml's, is light or dark as the
+// system's setting is, chosen before the page paints.
+import "../styles/site.css";
+import * as Search from "@islands/search.jsx";
+import Boxes from "@lucide/astro/icons/boxes";
+import Upload from "@lucide/astro/icons/upload";
+import GitHubMark from "../components/GitHubMark.astro";
+import { packages, repository } from "../lib/registry";
+import { documents, href } from "../lib/documents";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const github = `https://github.com/${repository}`;
+const searchable = packages.map((p) => ({ name: p.name, version: p.latest.version, synopsis: p.latest.synopsis ?? "" }));
+const footer = [["Publish", `${base}/publish/`], ...documents.map((d) => [d.title, href(d.slug)])];
+---
+
+<!doctype html>
+<html lang="en" data-theme="ocaml">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/logo.svg`} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <script is:inline>
+      // HeroUI's dark: variant reads .dark; the theme's colours, data-theme.
+      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+      if (dark) document.documentElement.classList.add("dark");
+      document.documentElement.dataset.theme = dark ? "ocaml-dark" : "ocaml";
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={`${base}/`}><img class="brand-mark" src={`${base}/logo.svg`} alt="" width="32" height="32" />open-opam</a>
+        <div class="site-search">
+          <Search.make client:idle packages={searchable} base={base} />
+        </div>
+        <nav class="site-nav" aria-label="Site">
+          <a class="button button--ghost button--sm" href={`${base}/packages/`}><Boxes size={16} /><span class="nav-text">Packages</span></a>
+          <a class="button button--ghost button--sm" href={`${base}/publish/`}><Upload size={16} /><span class="nav-text">Publish</span></a>
+          <a class="button button--ghost button--sm button--icon-only" href={github} aria-label="open-opam on GitHub"><GitHubMark /></a>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <nav aria-label="The registry">
+          {footer.map(([text, to]) => <a href={to}>{text}</a>)}
+        </nav>      </div>
+    </footer>
+  </body>
+</html>
