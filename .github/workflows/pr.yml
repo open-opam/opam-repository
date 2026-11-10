@@ -2,7 +2,8 @@
 # on pull_request_target, so this is what lets a publication be validated with no
 # click. It runs with write permissions, so it never checks out the pull request,
 # and nothing the pull request controls reaches a shell but its number and SHA.
-name: pr
+name: Start a pull request's check
+run-name: "Start the check of pull request #${{ github.event.pull_request.number }}"
 
 on:
   pull_request_target:

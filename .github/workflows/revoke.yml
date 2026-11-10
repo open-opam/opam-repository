@@ -3,7 +3,8 @@
 # repository can start a workflow; that is the authorisation, and the record says
 # who it was. Like an author's, it only adds records, and apply makes the opam
 # files match once it merges.
-name: revoke
+name: Revoke a release
+run-name: "Revoke ${{ inputs.name }} ${{ inputs.version || 'every version' }} (${{ inputs.reason }})"
 
 on:
   workflow_dispatch:
