@@ -7,6 +7,8 @@
 
 @import "tailwindcss";
 @import "@heroui/styles";
+/* Segment, TrendChip and TextShimmer, which HeroUI has no styles for */
+@import "vite-plugin-solidtype/heroui-extras.css";
 @import "tw-animate-css";
 
 @import "./themes/ocaml.css" layer(theme);
@@ -14,9 +16,6 @@
 /* The islands' classes are in the JavaScript Melange writes under _build,
    which Tailwind skips as ignored unless told. */
 @source "../../_build/default/islands/out/islands";
-/* Some of HeroUI's ports, the segment among them, are styled by utilities
-   written in the port's own JavaScript, which Melange writes there too. */
-@source "../../_build/default/islands/out/node_modules/solidtype-heroui";
 
 :root {
   --page: 76rem;
