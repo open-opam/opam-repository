@@ -1,5 +1,5 @@
-# The catalogue on GitHub Pages, rebuilt on every push to main, after each merge
-# the check makes, and after each download snapshot. It reads opam files,
+# The catalogue on GitHub Pages, rebuilt on every push to main and after each
+# download snapshot. It reads opam files,
 # records and snapshots, and asks GitHub for each release's date and downloads;
 # every branch is fetched, for the stats branch.
 #
@@ -18,9 +18,6 @@ on:
   workflow_run:
     workflows: [Count downloads]
     types: [completed]
-  # The check's merge is made with the workflow's token too, so it starts this
-  # by name.
-  workflow_dispatch:
 
 permissions: {}
 

@@ -1,25 +1,28 @@
-# Every gate, on one exact commit of one pull request. It is read from main and
-# runs the validator main names, so a submission cannot weaken its own gate.
-# Package code runs only in the install job, which has nothing worth taking, and
-# which no other job relies on: no cache is restored and no artifact is read.
+# Every gate, on one exact commit of one pull request. GitHub can hold a
+# first-time contributor's workflows for approval, but not one on
+# pull_request_target, so a publication is validated with no click. It is read
+# from main and runs the validator main names, so a submission cannot weaken its
+# own gate; the pull request's commit is fetched and read, never checked out
+# where a token is. GitHub blocks pull_request_target on a public repository
+# unless an Actions event policy allows it; this repository's policy does.
+#
+# What a pull request changes decides how it is judged, never where it comes
+# from. Package code runs only in the install job, which has nothing worth
+# taking, and which no other job relies on: no cache is restored and no artifact
+# is read.
 name: Check a pull request
-run-name: "Check pull request #${{ inputs.pr }}"
+run-name: "Check pull request #${{ github.event.pull_request.number }}"
 
 on:
-  workflow_dispatch:
-    inputs:
-      pr:
-        description: The pull request's number
-        required: true
-      sha:
-        description: The exact head commit to validate
-        required: true
-      merge:
-        description: Merge it once it passes, then apply its records and rebuild the catalogue
-        type: boolean
-        default: false
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions: {}
+
+concurrency:
+  group: validate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   gates:
@@ -34,8 +37,9 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
-      PR: ${{ inputs.pr }}
-      SHA: ${{ inputs.sha }}
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -47,31 +51,26 @@ jobs:
       # dune-release does before archiving; it runs dune's code, not the package's.
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq opam ocaml-dune
       - id: kind
-        name: Fetch the pull request's commit, without checking it out
+        name: Fetch the pull request's commit, and name what it changes
         run: |
-          case "$PR" in *[!0-9]*|'') echo "Not a number."; exit 1;; esac
-          case "$SHA" in *[!0-9a-f]*|'') echo "Not a commit."; exit 1;; esac
           git fetch --quiet "https://github.com/$REPO" "refs/pull/$PR/head:refs/heads/change"
           test "$(git rev-parse change)" = "$SHA"
-          head_repo=$(gh api "repos/$REPO/pulls/$PR" --jq .head.repo.full_name)
+          kind=$(.github/scripts/kind.sh main change)
           versions=$(git diff --name-only --diff-filter=A main...change -- 'packages/*/*/opam' | cut -d/ -f3 | tr '\n' ' ')
-          # A fork's pull request adds a release's opam files, or only records,
-          # which revoke or restore and run no package code.
-          if [ "$head_repo" = "$REPO" ]; then kind=registry
-          elif [ -n "$versions" ]; then kind=publication
-          else kind=record; fi
           echo "kind=$kind" >> "$GITHUB_OUTPUT"
           echo "versions=$versions" >> "$GITHUB_OUTPUT"
       - name: The gates that need no package code
-        if: steps.kind.outputs.kind != 'registry'
+        if: steps.kind.outputs.kind == 'publication' || steps.kind.outputs.kind == 'record'
         run: open-opam check --checkout . --base main --head change --registry "$REPO" | tee -a "$GITHUB_STEP_SUMMARY"
         shell: bash -o pipefail -e {0}
-      - name: A branch of this repository is only linted
-        if: steps.kind.outputs.kind == 'registry'
+      - name: A maintainer's revocation
+        if: steps.kind.outputs.kind == 'revocation'
         run: |
-          git diff --name-only --diff-filter=AM main...change -- 'packages/*/*/opam' | while read -r file; do
-            git show "change:$file" | opam lint -
-          done
+          permission=$(gh api "repos/$REPO/collaborators/$AUTHOR/permission" --jq .permission)
+          .github/scripts/check-revocation.sh main change "$AUTHOR" "$permission"
+      - name: A change to a published opam file is the one its records make
+        if: steps.kind.outputs.kind == 'apply'
+        run: .github/scripts/check-apply.sh main change
 
   install:
     needs: gates
@@ -81,7 +80,7 @@ jobs:
     permissions:
       contents: read
     env:
-      PR: ${{ inputs.pr }}
+      PR: ${{ github.event.pull_request.number }}
       VERSIONS: ${{ needs.gates.outputs.versions }}
       OPAMYES: "1"
       OPAMCONFIRMLEVEL: unsafe-yes
@@ -98,7 +97,7 @@ jobs:
           persist-credentials: false
       - name: Merge the pull request into main
         env:
-          SHA: ${{ inputs.sha }}
+          SHA: ${{ github.event.pull_request.head.sha }}
           REPO: ${{ github.repository }}
         run: |
           git fetch --quiet "https://github.com/$REPO" "refs/pull/$PR/head"
@@ -111,61 +110,41 @@ jobs:
       - name: Package code runs here
         run: opam install --switch=check $VERSIONS
 
-  report:
+  # The check main requires. GitHub makes it for this pull request's own run,
+  # from the jobs' results alone.
+  validate:
     needs: [gates, install]
     if: always()
     runs-on: ubuntu-24.04
-    permissions:
-      checks: write
-    outputs:
-      conclusion: ${{ steps.post.outputs.conclusion }}
     env:
-      GH_TOKEN: ${{ github.token }}
-      REPO: ${{ github.repository }}
-      SHA: ${{ inputs.sha }}
       GATES: ${{ needs.gates.result }}
       INSTALL: ${{ needs.install.result }}
       KIND: ${{ needs.gates.outputs.kind }}
     steps:
-      - id: post
-        name: Post the required check, from the jobs' results alone
-        run: |
-          conclusion=failure
-          if [ "$GATES" = success ]; then
-            if [ "$KIND" = registry ] && [ "$INSTALL" = skipped ]; then conclusion=success; fi
-            if [ "$KIND" = record ] && [ "$INSTALL" = skipped ]; then conclusion=success; fi
-            if [ "$KIND" = publication ] && [ "$INSTALL" = success ]; then conclusion=success; fi
-          fi
-          gh api "repos/$REPO/check-runs" -X POST -f name=validate -f head_sha="$SHA" -f status=completed -f conclusion="$conclusion" --silent
-          echo "conclusion=$conclusion" >> "$GITHUB_OUTPUT"
+      - run: |
+          test "$GATES" = success
+          if [ "$KIND" = publication ]; then test "$INSTALL" = success; else test "$INSTALL" = skipped; fi
 
-  # A merge made with the workflow token starts no workflow, so this merge
-  # starts what must follow it by name, which GitHub allows: apply, for the
-  # records it may have added, and the catalogue.
+  # The registry's App merges, so the merge is a push like any other and starts
+  # what follows it. The App holds no exemption: GitHub refuses its merge too
+  # without the check. Its key is in an environment only main's workflows reach.
+  # Anything but packages and records waits for a maintainer.
   merge:
-    needs: report
-    if: inputs.merge && needs.report.outputs.conclusion == 'success'
+    needs: [gates, validate]
+    if: needs.validate.result == 'success' && needs.gates.outputs.kind != 'other'
     runs-on: ubuntu-24.04
-    permissions:
-      actions: write
-      contents: write
-      pull-requests: write
+    environment: registry
     env:
-      GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
-      PR: ${{ inputs.pr }}
-      SHA: ${{ inputs.sha }}
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app
+        with:
+          client-id: ${{ vars.REGISTRY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.REGISTRY_APP_PRIVATE_KEY }}
       - name: Merge the commit that passed, and nothing pushed since
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
         run: gh pr merge "$PR" --squash --delete-branch --match-head-commit "$SHA" -R "$REPO"
-      # Should GitHub refuse a start five times, the daily download count
-      # starts apply and the catalogue again.
-      - name: Start apply and the catalogue
-        run: |
-          for workflow in apply.yml docs.yml; do
-            for attempt in 1 2 3 4 5; do
-              gh workflow run "$workflow" -R "$REPO" --ref main && continue 2
-              sleep $((attempt * 15))
-            done
-            exit 1
-          done
