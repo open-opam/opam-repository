@@ -86,9 +86,11 @@ jobs:
       # against what the registry will hold, a dependency published since its
       # branch was made among it. GitHub's own merge ref is recomputed only
       # when something asks for it, so it can name an older main.
+      # All of main's history, since a merge needs the commit both share.
       - uses: actions/checkout@v5
         with:
           ref: main
+          fetch-depth: 0
           persist-credentials: false
       - name: Merge the pull request into main
         env:
