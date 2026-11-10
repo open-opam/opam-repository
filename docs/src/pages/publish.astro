@@ -49,6 +49,10 @@ const commands: { name: string; usage: string; what: string; options: [string, s
 
     <section class="doc-section" id="how">
       <h2><Rocket size={20} />How do I publish?</h2>
+      <p>
+        First install <a href="https://cli.github.com">GitHub CLI</a> and sign in with <code>gh auth login</code>:
+        open-opam acts as you through it.
+      </p>
       <Copy.make client:visible label="installing open-opam" code={`${add}\nopam install open-opam`} />
       <Copy.make client:visible label="the publishing commands" code={"open-opam init\nopen-opam check 1.2.3\nopen-opam publish 1.2.3"} />
       <p>
