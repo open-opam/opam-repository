@@ -1,0 +1,17 @@
+---
+// One of the registry's own documents, from its file at the registry's root,
+// rendered and sanitised as a README is.
+import Base from "../layouts/Base.astro";
+import { documents, render, type Document } from "../lib/documents";
+
+export function getStaticPaths() {
+  return documents.map((document) => ({ params: { document: document.slug }, props: { document } }));
+}
+
+const { document } = Astro.props as { document: Document };
+const html = await render(document);
+---
+
+<Base title={`${document.title} · open-opam`} description={`The open-opam registry's ${document.title.toLowerCase()}.`}>
+  <article class="card card--default readme document" set:html={html} />
+</Base>

@@ -1,0 +1,31 @@
+---
+// A package in a list, as a HeroUI card: its name, latest version, synopsis,
+// and when it was last published.
+import Package from "@lucide/astro/icons/package";
+import Calendar from "@lucide/astro/icons/calendar";
+import Download from "@lucide/astro/icons/download";
+import type { Package as Pkg } from "../lib/registry";
+
+interface Props {
+  pkg: Pkg;
+  downloads?: number; // shown when the list ranks by them
+}
+
+const { pkg, downloads } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const day = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+---
+
+<a class="card card--default card-link" href={`${base}/packages/${pkg.name}/`}>
+  <span class="package-card-head">
+    <span class="package-icon"><Package size={18} /></span>
+    <strong>{pkg.name}</strong>
+    <span class="chip chip--sm chip--secondary"><span class="chip__label">{pkg.latest.version}</span></span>
+  </span>
+  {pkg.latest.synopsis && <span class="package-card-synopsis">{pkg.latest.synopsis}</span>}
+  <span class="package-card-meta">
+    {pkg.latest.published && <span><Calendar size={13} />{day(pkg.latest.published)}</span>}
+    {downloads !== undefined && <span><Download size={13} />{downloads.toLocaleString("en-GB")} downloads</span>}
+  </span>
+</a>

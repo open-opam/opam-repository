@@ -1,0 +1,220 @@
+---
+// One version of a package, as opam knows it and as this registry holds it.
+// Everything shown is the author's text, so Astro escapes it and only a web
+// address becomes a link; the README alone is rendered, already sanitised.
+// The tabs, the version picker and the copy buttons are islands; the rest is
+// HTML with HeroUI's classes.
+import Base from "../layouts/Base.astro";
+import DownloadsChart from "./DownloadsChart.astro";
+import GitHubMark from "./GitHubMark.astro";
+import * as Copy from "@islands/copy.jsx";
+import * as Tabs from "@islands/package_tabs.jsx";
+import * as Versions from "@islands/versions_menu.jsx";
+import * as ListTable from "@islands/list_table.jsx";
+import * as Trail from "@islands/trail.jsx";
+import Tag from "@lucide/astro/icons/tag";
+import Terminal from "@lucide/astro/icons/terminal";
+import ShieldCheck from "@lucide/astro/icons/shield-check";
+import ChartLine from "@lucide/astro/icons/chart-line";
+import LinkIcon from "@lucide/astro/icons/link";
+import Flag from "@lucide/astro/icons/flag";
+import House from "@lucide/astro/icons/house";
+import Bug from "@lucide/astro/icons/bug";
+import Info from "@lucide/astro/icons/info";
+import Download from "@lucide/astro/icons/download";
+import { find, repository, safeUrl, type Package, type Version } from "../lib/registry";
+
+interface Props {
+  pkg: Package;
+  version: Version;
+}
+
+const { pkg, version: v } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const github = `https://github.com/${repository}`;
+const href = (name: string, version?: string) =>
+  find(name) ? `${base}/packages/${name}/${version ? `${version}/` : ""}` : `https://ocaml.org/p/${name}`;
+const isLatest = v.version === pkg.latest.version;
+const downloads = v.archive?.downloads;
+const lastThirty = downloads?.days.reduce((n, d) => n + d.downloads, 0);
+const count = (n: number) => n.toLocaleString("en-GB");
+const day = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const homepage = safeUrl(v.homepage[0]);
+const source = safeUrl(v.devRepo);
+const issues = safeUrl(v.bugReports[0]);
+const release = v.archive ? `https://github.com/${v.archive.repository}/releases/tag/${encodeURIComponent(v.archive.tag)}` : undefined;
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const tabs = [
+  { id: "readme", label: "Readme" },
+  { id: "versions", label: plural(pkg.versions.length, "Version", "Versions") },
+  { id: "dependencies", label: plural(v.depends.length, "Dependency", "Dependencies") },
+  { id: "dependents", label: plural(pkg.requiredBy.length, "Dependent", "Dependents") },
+];
+// Where the page sits: Packages, the package, the version.
+const trail = [
+  { label: "Packages", href: `${base}/packages/` },
+  { label: pkg.name, href: isLatest ? null : href(pkg.name) },
+  ...(isLatest ? [] : [{ label: v.version, href: null }]),
+];
+// A table's cell, as the table island takes it.
+const cell = (text: string, o: { href?: string; code?: boolean; chip?: string; danger?: boolean } = {}) => ({
+  text,
+  href: o.href ?? null,
+  code: o.code ?? false,
+  chip: o.chip ?? null,
+  danger: o.danger ?? false,
+});
+const versionRows = pkg.versions.map((o) => ({
+  cells: [
+    cell(o.version, {
+      href: href(pkg.name, o.version),
+      code: true,
+      ...(o.state.kind === "revoked" ? { chip: `revoked: ${o.state.revocation.reason}`, danger: true } : {}),
+    }),
+    cell(o.published ? day(o.published) : "—"),
+    cell(o.archive?.downloads ? count(o.archive.downloads.total) : "—"),
+  ],
+}));
+const dependencyRows = (list: { name: string; constraint?: string; alternative: boolean }[]) =>
+  list.map((d) => ({
+    cells: [cell(d.name, { href: href(d.name), ...(d.alternative ? { chip: "or another" } : {}) }), cell(d.constraint ?? "", { code: true })],
+  }));
+const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state.kind === "revoked", href: href(pkg.name, o.version) }));
+---
+
+<Base title={`${v.name} ${v.version} · open-opam`} description={v.synopsis ?? `${v.name} on open-opam`}>
+  <div class="crumb"><Trail.make steps={trail} /></div>
+
+  <div class="package-head">
+    <div>
+      <div class="package-title">
+        <h1>{v.name}</h1>
+        <Versions.make client:idle current={v.version} versions={versions} />
+      </div>
+      {v.synopsis && <p class="synopsis">{v.synopsis}</p>}
+    </div>
+  </div>
+
+  {(v.state.kind === "revoked" || !isLatest || pkg.owner?.status === "disputed") && (
+    <div class="notices">
+      {v.state.kind === "revoked" && (
+        <div class="alert alert--danger" role="alert">
+          <div class="alert__content">
+            <div class="alert__title">Revoked: opam will not install this version.</div>
+            <div class="alert__description">
+              Reason: {v.state.revocation.reason}, by {v.state.revocation.actor} on {day(v.state.revocation.revoked_at.slice(0, 10))}.
+              {safeUrl(v.state.revocation.evidence) && <> <a class="link" href={safeUrl(v.state.revocation.evidence)}>Evidence</a>.</>}
+            </div>
+          </div>
+        </div>
+      )}
+      {!isLatest && (
+        <div class="alert alert--accent">
+          <div class="alert__content">
+            <div class="notice-line"><Info size={18} />A newer version is out: <a class="link" href={href(pkg.name)}>{pkg.name} {pkg.latest.version}</a></div>
+          </div>
+        </div>
+      )}
+      {pkg.owner?.status === "disputed" && (
+        <div class="alert alert--warning">
+          <div class="alert__content">
+            <div class="alert__title">This name is disputed.</div>
+            <div class="alert__description">No new version of it can be published until the dispute is decided.</div>
+          </div>
+        </div>
+      )}
+    </div>
+  )}
+
+  <div class="package-body">
+    <div>
+      <Tabs.make client:load tabs={tabs}>
+        <div slot="readme">
+          {pkg.readme ? (
+            <>
+              <div class="card card--default readme" set:html={pkg.readme.html} />
+              {!isLatest && v.commit && v.archive && (
+                <p class="side-note">
+                  This is the README of {pkg.latest.version}, the latest version.{" "}
+                  <a class="link" href={`https://github.com/${v.archive.repository}/tree/${v.commit}#readme`}>This version's README</a>
+                </p>
+              )}
+            </>
+          ) : (
+            <div class="card card--default readme">
+              {v.description ? v.description.split(/\n\s*\n/).map((paragraph) => <p>{paragraph}</p>) : <p class="empty">No README.</p>}
+            </div>
+          )}
+        </div>
+        <div slot="versions">
+          <ListTable.make label="Versions" columns={["Version", "Published", "Downloads"]} rows={versionRows} />
+        </div>
+        <div slot="dependencies">
+          {v.depends.length === 0 ? <p class="empty">None.</p> : <ListTable.make label="Dependencies" columns={["Package", "Constraint"]} rows={dependencyRows(v.depends)} />}
+          {v.depopts.length > 0 && (
+            <div class="optional"><ListTable.make label="Optional dependencies" columns={["Optional", "Constraint"]} rows={dependencyRows(v.depopts)} /></div>
+          )}
+        </div>
+        <div slot="dependents">
+          {pkg.requiredBy.length === 0 ? <p class="empty">No package in this registry requires it.</p> : (
+            <ListTable.make label="Dependents" columns={["Package", "Constraint"]} rows={dependencyRows(pkg.requiredBy.map((r) => ({ ...r, alternative: false })))} />
+          )}
+        </div>
+      </Tabs.make>
+    </div>
+
+    <aside class="side">
+      <section class="card card--default">
+        <h2><Terminal size={16} />Install</h2>
+        <span class="field-label">Once, to add the registry</span>
+        <Copy.make client:visible label="the command that adds the registry" code={`opam repo add open-opam https://github.com/${repository}.git`} />
+        <span class="field-label">opam</span>
+        <Copy.make client:visible label="the install command" code={`opam install ${v.name}.${v.version}`} />
+        <span class="field-label">dune-project</span>
+        <Copy.make client:visible label="the dependency" code={`(${v.name} (>= ${v.version}))`} />
+      </section>
+
+      <section class="card card--default">
+        <h2><ChartLine size={16} />Details</h2>
+        {downloads && downloads.days.length > 1 && <DownloadsChart days={downloads.days} />}
+        <dl class="facts">
+          {downloads && (
+            <>
+              <div><dt>Downloads</dt><dd class="number with-icon"><Download size={18} />{count(downloads.total)}</dd></div>
+              {downloads.days.length > 0 && <div><dt>Last 30 days</dt><dd class="number">{count(lastThirty ?? 0)}</dd></div>}
+            </>
+          )}
+          {v.published && <div><dt>Published</dt><dd>{day(v.published)}</dd></div>}
+          {v.license.length > 0 && <div><dt>Licence</dt><dd>{v.license.join(", ")}</dd></div>}
+          {pkg.owner && (
+            <div class="wide">
+              <dt>Repository</dt>
+              <dd><a href={`https://github.com/${pkg.owner.repository}`}>{pkg.owner.repository}</a></dd>
+            </div>
+          )}
+          {v.maintainers.length > 0 && <div class="wide"><dt>Maintainers</dt><dd>{v.maintainers.join(", ")}</dd></div>}
+        </dl>
+      </section>
+
+      <section class="card card--default">
+        <h2><LinkIcon size={16} />Links</h2>
+        <ul class="links">
+          {homepage && <li><a href={homepage}><House size={16} />Homepage</a></li>}
+          {source && <li><a href={source}><GitHubMark size={16} />Source</a></li>}
+          {issues && <li><a href={issues}><Bug size={16} />Issues</a></li>}
+          {release && <li><a href={release}><Tag size={16} />Release {v.archive?.tag}</a></li>}
+        </ul>
+        <a class="report-link" href={`${github}/security/advisories/new`}><Flag size={14} />Report a malicious or vulnerable package</a>
+      </section>
+
+      {v.sha256 && (
+        <section class="card card--default">
+          <h2><ShieldCheck size={16} />Checksum</h2>
+          <Copy.make client:visible label="the checksum" code={`sha256=${v.sha256}`} />
+        </section>
+      )}
+
+    </aside>
+  </div>
+</Base>

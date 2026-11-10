@@ -1,0 +1,14 @@
+---
+import PackagePage from "../../../components/PackagePage.astro";
+import { packages } from "../../../lib/registry";
+
+export function getStaticPaths() {
+  return packages.flatMap((pkg) =>
+    pkg.versions.map((version) => ({ params: { name: pkg.name, version: version.version }, props: { pkg, version } })),
+  );
+}
+
+const { pkg, version } = Astro.props;
+---
+
+<PackagePage pkg={pkg} version={version} />

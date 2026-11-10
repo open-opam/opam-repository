@@ -1,0 +1,28 @@
+---
+// Every package, as a list that stays usable at any size: sorted and paged
+// by the island, its first page rendered here.
+import Base from "../../layouts/Base.astro";
+import * as PackageList from "@islands/package_list.jsx";
+import Boxes from "@lucide/astro/icons/boxes";
+import { packages } from "../../lib/registry";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const day = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const rows = packages.map((p) => ({
+  name: p.name,
+  version: p.latest.version,
+  synopsis: p.latest.synopsis ?? "",
+  published: p.latest.published ?? "",
+  published_label: p.latest.published ? day(p.latest.published) : "",
+  downloads: p.latest.archive?.downloads?.total ?? 0,
+  href: `${base}/packages/${p.name}/`,
+}));
+---
+
+<Base title="Packages · open-opam" description="Every package in the open-opam registry.">
+  <div class="package-index">
+    <h1 class="page-title"><Boxes size={28} />Packages</h1>
+    <PackageList.make client:load packages={rows} />
+  </div>
+</Base>

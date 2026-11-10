@@ -1,0 +1,51 @@
+(* A package page's tabs, each panel the page's own HTML, rendered when the
+   site is built and handed in by Astro as a slot. The address's fragment
+   chooses the tab, and choosing one writes it there, so a tab can be linked. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Tabs = Solidtype_heroui.Tabs
+
+type tab = { id : string; label : string }
+
+external hash : string = "hash" [@@mel.scope "window", "location"]
+
+external replace_state : Js.Json.t Js.null -> string -> string -> unit
+  = "replaceState"
+[@@mel.scope "window", "history"]
+
+let%component make ~(tabs : tab array) ~(readme : Jsx.element)
+    ~(versions : Jsx.element) ~(dependencies : Jsx.element)
+    ~(dependents : Jsx.element) () =
+  let first = "readme" in
+  let selected, set_selected = S.create_signal first in
+  (* The address chooses the tab once the page is in the browser, so the
+     server's HTML and the first render agree. *)
+  S.on_mount (fun () ->
+      let wanted =
+        match String.length hash with
+        | 0 -> ""
+        | n -> String.sub hash 1 (n - 1)
+      in
+      if Array.exists (fun (t : tab) -> String.equal t.id wanted) (tabs ())
+      then S.set set_selected wanted);
+  <Tabs
+    selected_key=(fun () -> S.get selected)
+    on_selection_change=(fun id ->
+                          S.set set_selected id;
+                          replace_state Js.null "" ("#" ^ id))>
+    <Tabs.List_container>
+      <Tabs.List aria_label="About this package">
+        <Solidtype.For each=(fun () -> tabs ())>
+          (fun (t : tab) _ ->
+            <Tabs.Tab id=(fun () -> t.id)>
+              (fun () -> Jsx.string t.label) <Tabs.Indicator />
+            </Tabs.Tab>)
+        </Solidtype.For>
+      </Tabs.List>
+    </Tabs.List_container>
+    <Tabs.Panel class_="pt-5" id="readme">(fun () -> Jsx.element (readme ()))</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="versions">(fun () -> Jsx.element (versions ()))</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="dependencies">(fun () -> Jsx.element (dependencies ()))</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="dependents">(fun () -> Jsx.element (dependents ()))</Tabs.Panel>
+  </Tabs>

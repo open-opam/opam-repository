@@ -1,0 +1,62 @@
+(* A line to copy, and the button that copies it: a copy icon that turns into
+   a check, in the colour of success, once the line is on the clipboard. The
+   button's name says the same while the check shows, for a reader who cannot
+   see it. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+
+external write_text : string -> unit Js.Promise.t = "writeText"
+[@@mel.scope "navigator", "clipboard"]
+
+(* How long the check shows. *)
+let said_ms = 1500
+
+let%component make ~(code : string) ~(label : string) () =
+  let copied, set_copied = S.create_signal false in
+  let copy _ =
+    let (_ : unit Js.Promise.t) =
+      Js.Promise.then_
+        (fun () ->
+          S.set set_copied true;
+          let (_ : Js.Global.timeoutId) =
+            Js.Global.setTimeout ~f:(fun () -> S.set set_copied false) said_ms
+          in
+          Js.Promise.resolve ())
+        (write_text (code ()))
+    in
+    ()
+  in
+  <div class_="copy">
+    <code>(fun () -> Jsx.string (code ()))</code>
+    <Button
+      size=`sm
+      variant=`ghost
+      is_icon_only=true
+      class_=(fun () ->
+               if S.get copied then "copy-button copied" else "copy-button")
+      aria_label=(fun () ->
+                   (if S.get copied then "Copied " else "Copy ") ^ label ())
+      on_click=copy>
+      <svg class_="copy-icon" fill="none" view_box="0 0 24 24">
+        <rect
+          x="9" y="9" width="13" height="13" rx="2"
+          stroke="currentColor" stroke_width="2" stroke_linecap="round"
+          stroke_linejoin="round"
+        />
+        <path
+          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+          stroke="currentColor" stroke_width="2" stroke_linecap="round"
+          stroke_linejoin="round"
+        />
+      </svg>
+      <svg class_="check-icon" fill="none" view_box="0 0 24 24">
+        <path
+          d="M20 6 9 17l-5-5"
+          stroke="currentColor" stroke_width="2.5" stroke_linecap="round"
+          stroke_linejoin="round"
+        />
+      </svg>
+    </Button>
+  </div>

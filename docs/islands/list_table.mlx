@@ -1,0 +1,60 @@
+(* A package page's lists -- its versions, dependencies and dependents -- as
+   HeroUI's table. It is rendered when the site is built and runs nothing in
+   the browser: the page uses it with no directive. *)
+
+module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
+module Table = Solidtype_heroui.Table
+
+type cell = {
+  text : string;
+  href : string Js.Nullable.t;  (** the cell links here *)
+  code : bool;  (** the text is code, as a version constraint *)
+  chip : string Js.Nullable.t;  (** a note beside the text *)
+  danger : bool;  (** the note warns, as a revocation *)
+}
+
+type row = { cells : cell array }
+
+let content (c : cell) =
+  let text =
+    if c.code then <code>(fun () -> Jsx.string c.text)</code>
+    else <span>(fun () -> Jsx.string c.text)</span>
+  in
+  match Js.Nullable.toOption c.href with
+  | Some href -> <a href>(fun () -> Jsx.element text)</a>
+  | None -> text
+
+let%component make ~(label : string) ~(columns : string array) ~(rows : row array) () =
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content aria_label=(fun () -> label ())>
+        <Table.Header>
+          <Solidtype.For each=(fun () -> columns ())>
+            (fun column _ ->
+              <Table.Column>(fun () -> Jsx.string column)</Table.Column>)
+          </Solidtype.For>
+        </Table.Header>
+        <Table.Body>
+          <Solidtype.For each=(fun () -> rows ())>
+            (fun (r : row) _ ->
+              <Table.Row>
+                <Solidtype.For each=(fun () -> r.cells)>
+                  (fun (c : cell) _ ->
+                    <Table.Cell>
+                      <span class_="inline-flex flex-wrap items-center gap-2">
+                        (fun () -> Jsx.element (content c))
+                        <Solidtype.Show when_=(fun () -> Js.Nullable.isNullable c.chip |> not)>
+                          <Chip size=`sm color=(fun () -> if c.danger then `danger else `default)>
+                            (fun () -> Jsx.string (Option.value ~default:"" (Js.Nullable.toOption c.chip)))
+                          </Chip>
+                        </Solidtype.Show>
+                      </span>
+                    </Table.Cell>)
+                </Solidtype.For>
+              </Table.Row>)
+          </Solidtype.For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

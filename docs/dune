@@ -1,0 +1,9 @@
+; The catalogue is Astro's, built by `make docs`; dune builds its islands,
+; OCaml compiled by Melange, and reads none of its JavaScript.
+
+(dirs :standard \ node_modules public)
+
+(env
+ (_
+  (flags
+   (:standard -w +a-4-40-41-42-44-45-48-67-70))))

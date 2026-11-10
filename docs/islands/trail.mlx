@@ -1,0 +1,19 @@
+(* Where a page sits, as HeroUI's breadcrumbs: Packages, the repository, the
+   package, the version. Rendered when the site is built; the page uses it
+   with no directive, so it runs nothing in the browser. *)
+
+module Jsx = Solidtype.Jsx
+module Breadcrumbs = Solidtype_heroui.Breadcrumbs
+
+type step = { label : string; href : string Js.Nullable.t  (** none: the page itself *) }
+
+let%component make ~(steps : step array) () =
+  <Breadcrumbs>
+    <Solidtype.For each=(fun () -> steps ())>
+      (fun (s : step) _ ->
+        match Js.Nullable.toOption s.href with
+        | Some href ->
+            <Breadcrumbs.Item href=(fun () -> href)>(fun () -> Jsx.string s.label)</Breadcrumbs.Item>
+        | None -> <Breadcrumbs.Item>(fun () -> Jsx.string s.label)</Breadcrumbs.Item>)
+    </Solidtype.For>
+  </Breadcrumbs>

@@ -1,0 +1,144 @@
+---
+// What each check looks at in detail is left to the code, on GitHub.
+import Base from "../layouts/Base.astro";
+import * as Copy from "@islands/copy.jsx";
+import Upload from "@lucide/astro/icons/upload";
+import Rocket from "@lucide/astro/icons/rocket";
+import ListChecks from "@lucide/astro/icons/list-checks";
+import FolderCheck from "@lucide/astro/icons/folder-check";
+import Fingerprint from "@lucide/astro/icons/user-check";
+import Undo from "@lucide/astro/icons/undo-2";
+import TriangleAlert from "@lucide/astro/icons/triangle-exclamation-point";
+import BookOpen from "@lucide/astro/icons/book-open";
+import Check from "@lucide/astro/icons/check";
+import { repository } from "../lib/registry";
+import { gates } from "../lib/gates";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const add = `opam repo add open-opam https://github.com/${repository}.git`;
+// The commands are the release of open-opam the registry's CI runs, the one
+// .github/actions/install-cli names; when that changes, so may they.
+const commands: { name: string; usage: string; what: string; options: [string, string][] }[] = [
+  { name: "init", usage: "open-opam init", what: "Prepares your repository to publish, once.", options: [] },
+  {
+    name: "check",
+    usage: "open-opam check [VERSION]",
+    what: "Says whether this commit, released as VERSION, would pass, before you tag it.",
+    options: [],
+  },
+  {
+    name: "publish",
+    usage: "open-opam publish VERSION",
+    what: "Sends the release tagged VERSION to the registry.",
+    options: [["--dry-run", "Show what it would check, and send nothing."]],
+  },
+  {
+    name: "revoke",
+    usage: "open-opam revoke VERSION",
+    what: "Takes a release back: opam stops installing it, and it stays listed.",
+    options: [["--undo", "Restore a release you revoked."]],
+  },
+];
+---
+
+<Base title="Publish · open-opam" description="Publish an OCaml package to open-opam from its GitHub release.">
+  <div class="doc-layout">
+    <div>
+    <h1 class="page-title"><Upload size={28} />Publish</h1>
+    <p class="lead">Publish an OCaml package to open-opam from its GitHub release.</p>
+
+    <section class="doc-section" id="how">
+      <h2><Rocket size={20} />How do I publish?</h2>
+      <Copy.make client:visible label="installing open-opam" code={`${add}\nopam install open-opam`} />
+      <Copy.make client:visible label="the publishing commands" code={"open-opam init\nopen-opam check 1.2.3\nopen-opam publish 1.2.3"} />
+      <p>
+        <a href={`${base}/packages/open-opam/`}>open-opam</a>'s <code>init</code> prepares your repository once.
+        <code>check</code> tells you before tagging whether a version would pass. <code>publish</code> sends the
+        release to the registry.
+      </p>
+      <p class="side-note">
+        To let official opam's file win where both repositories hold the same package version, add the registry last,
+        with <code>--rank=-1</code>.
+      </p>
+    </section>
+
+    <section class="doc-section" id="release">
+      <h2><ListChecks size={20} />What does my release need?</h2>
+      <p>
+        An immutable GitHub release, with its source archive attached before it is published. The registry checks it
+        against these rules:
+      </p>
+      <ul class="hero-gates">
+        {gates.map(([name]) => <li><Check size={14} aria-hidden="true" />{name}</li>)}
+      </ul>
+    </section>
+
+    <section class="doc-section" id="project">
+      <h2><FolderCheck size={20} />What does my project need?</h2>
+      <p>CI that runs on the branch you tag, and a <code>README</code>, an <code>.mli</code> and a test.</p>
+    </section>
+
+    <section class="doc-section" id="names">
+      <h2><Fingerprint size={20} />Who owns a package name?</h2>
+      <p>
+        The repository that first publishes it. A name official opam already holds can only be published from the
+        repository official opam names for it.
+      </p>
+    </section>
+
+    <section class="doc-section" id="revoke">
+      <h2><Undo size={20} />Can I take a release back?</h2>
+      <p><code>open-opam revoke 1.2.3</code>. opam stops installing it, and it stays listed.</p>
+    </section>
+
+    <section class="doc-section" id="limits">
+      <h2><TriangleAlert size={20} />What doesn't it do?</h2>
+      <p>GitHub and dune only. No person reviews a package, so passing the checks doesn't mean the code is safe.</p>
+    </section>
+
+    <section class="doc-section" id="reference">
+      <h2><BookOpen size={20} />Command reference</h2>
+      {commands.map((c) => (
+        <div class="card card--default command" id={`command-${c.name}`}>
+          <h3><code>open-opam {c.name}</code></h3>
+          <p>{c.what}</p>
+          <pre class="usage"><code>{c.usage}</code></pre>
+          {c.options.length > 0 && (
+            <dl class="options">
+              {c.options.map(([option, text]) => (
+                <>
+                  <dt><code>{option}</code></dt>
+                  <dd>{text}</dd>
+                </>
+              ))}
+            </dl>
+          )}
+        </div>
+      ))}
+    </section>
+    </div>
+    <nav class="on-this-page" aria-label="On this page">
+      <span class="field-label">On this page</span>
+      <a href="#how"><Rocket size={14} />How do I publish?</a>
+      <a href="#release"><ListChecks size={14} />What does my release need?</a>
+      <a href="#project"><FolderCheck size={14} />What does my project need?</a>
+      <a href="#names"><Fingerprint size={14} />Who owns a package name?</a>
+      <a href="#revoke"><Undo size={14} />Can I take a release back?</a>
+      <a href="#limits"><TriangleAlert size={14} />What doesn't it do?</a>
+      <a href="#reference"><BookOpen size={14} />Command reference</a>
+    </nav>
+  </div>
+</Base>
+
+<script>
+  // The section in view is marked in the contents beside it.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>(".on-this-page a")];
+  const sections = links.map((a) => document.querySelector<HTMLElement>(a.hash)).filter((e): e is HTMLElement => e !== null);
+  const mark = () => {
+    const passed = sections.filter((s) => s.getBoundingClientRect().top < window.innerHeight * 0.3);
+    const current = passed.at(-1) ?? sections[0];
+    for (const a of links) a.setAttribute("aria-current", String(a.hash === `#${current?.id}`));
+  };
+  window.addEventListener("scroll", mark, { passive: true });
+  mark();
+</script>

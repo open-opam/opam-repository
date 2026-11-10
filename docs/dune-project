@@ -1,0 +1,13 @@
+(lang dune 3.18)
+
+(using melange 0.1)
+
+(implicit_transitive_deps false)
+
+(dialect
+ (name mlx)
+ (implementation
+  (extension mlx)
+  (merlin_reader mlx)
+  (preprocess
+   (run mlx-pp %{input-file}))))
