@@ -1,0 +1,45 @@
+opam-version: "2.0"
+synopsis:
+  "SQLite for a Spindle server: a pool in WAL mode and its probe, sessions, and a failure's refusal"
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/spindle"
+bug-reports: "https://github.com/hyphatech/spindle/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "spindle" {= version}
+  "rowtype" {>= "0.10.0" & < "0.11.0"}
+  "rowtype-sqlite" {>= "0.10.0" & < "0.11.0"}
+  "ptime" {>= "1.2.0"}
+  "mtime" {>= "2.1.0"}
+  "eio" {>= "1.6"}
+  "logs" {>= "0.10.0"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "eio_main" {with-test & >= "1.6"}
+  "wiretype" {with-test & >= "0.7.0" & < "0.8.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/spindle.git"
+x-maintenance-intent: ["(latest)"]
+x-open-opam: true
+x-commit-hash: "b5652f0eb99ded1cde72d23ddc92e38bd82a701b"
+url {
+  src: "https://github.com/hyphatech/spindle/releases/download/0.15.0/spindle-0.15.0.tar.gz"
+  checksum: "sha256=120c6f3089ea40ac667de95975e5414ce2256375d09a67a290b663c00281473e"
+}
