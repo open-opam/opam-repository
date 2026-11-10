@@ -82,13 +82,22 @@ jobs:
       OPAMYES: "1"
       OPAMCONFIRMLEVEL: unsafe-yes
     steps:
-      # The pull request merged into main, as GitHub keeps it, so a package
-      # installs against what the registry will hold, not what it held when
-      # its branch was made: a dependency published since is there.
+      # The pull request merged into main as it is now, so a package installs
+      # against what the registry will hold, a dependency published since its
+      # branch was made among it. GitHub's own merge ref is recomputed only
+      # when something asks for it, so it can name an older main.
       - uses: actions/checkout@v5
         with:
-          ref: refs/pull/${{ inputs.pr }}/merge
+          ref: main
           persist-credentials: false
+      - name: Merge the pull request into main
+        env:
+          SHA: ${{ inputs.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          git fetch --quiet "https://github.com/$REPO" "refs/pull/$PR/head"
+          test "$(git rev-parse FETCH_HEAD)" = "$SHA"
+          git -c user.name=validate -c user.email=validate@localhost merge --quiet --no-edit FETCH_HEAD
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq opam
       - run: opam init --bare --disable-sandboxing -n default https://opam.ocaml.org
       - run: opam repo add --dont-select registry "file://$PWD"
