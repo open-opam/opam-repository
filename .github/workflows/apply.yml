@@ -2,14 +2,17 @@
 # restoration is unavailable, and a restored one holds the bytes it was published
 # with. A pull request only adds records, so an author's fork never carries this
 # edit; the registry makes it, in a pull request of its own, validated like any.
-# It runs on a schedule, since a merge made with the workflow token, as
-# auto-merge's is, starts no workflow; making a file match twice changes nothing.
+# The check starts it after each merge it makes; making a file match twice
+# changes nothing.
 name: Make opam files match their records
 
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
+  # Once a day as well, after the download count, should a start after a merge
+  # have failed.
+  workflow_run:
+    workflows: [Count downloads]
+    types: [completed]
 
 permissions: {}
 
@@ -53,5 +56,4 @@ jobs:
           git commit -qam "$title"
           git push -q --force origin apply
           url=$(gh pr create --base main --head apply --title "$title" --body "Makes the opam files match their records.")
-          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)"
-          gh pr merge "${url##*/}" --auto --squash --delete-branch -R "$REPO"
+          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)" -f merge=true

@@ -1,7 +1,7 @@
-# The catalogue on GitHub Pages, rebuilt on every push to main, so a merged
-# publication or revocation shows there, and after each download snapshot. It
-# reads opam files, records and snapshots, and asks GitHub for each release's
-# date and downloads; every branch is fetched, for the stats branch.
+# The catalogue on GitHub Pages, rebuilt on every push to main, after each merge
+# the check makes, and after each download snapshot. It reads opam files,
+# records and snapshots, and asks GitHub for each release's date and downloads;
+# every branch is fetched, for the stats branch.
 #
 # Its islands are OCaml, built with solidtype installed from this registry, so
 # the build runs a package's code: it has only a read token, and the token
@@ -18,11 +18,8 @@ on:
   workflow_run:
     workflows: [Count downloads]
     types: [completed]
-  # Auto-merge merges with the workflow's token too, so a publication merged by
-  # itself starts nothing either; this catches up, building only when main has
-  # moved past what the catalogue was last built from.
-  schedule:
-    - cron: "*/15 * * * *"
+  # The check's merge is made with the workflow's token too, so it starts this
+  # by name.
   workflow_dispatch:
 
 permissions: {}
@@ -32,26 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  behind:
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      deployments: read
-    outputs:
-      behind: ${{ steps.compare.outputs.behind }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      REPO: ${{ github.repository }}
-    steps:
-      - id: compare
-        run: |
-          main=$(gh api "repos/$REPO/commits/main" --jq .sha)
-          built=$(gh api "repos/$REPO/deployments?environment=github-pages&per_page=1" --jq '.[0].sha // ""')
-          if [ "$main" = "$built" ]; then echo "behind=false"; else echo "behind=true"; fi >> "$GITHUB_OUTPUT"
-
   build:
-    needs: behind
-    if: github.event_name != 'schedule' || needs.behind.outputs.behind == 'true'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
