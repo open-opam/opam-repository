@@ -65,9 +65,12 @@ jobs:
         shell: bash -o pipefail -e {0}
       - name: A maintainer's revocation
         if: steps.kind.outputs.kind == 'revocation'
+        env:
+          APP: open-opam-registry[bot]
         run: |
-          permission=$(gh api "repos/$REPO/collaborators/$AUTHOR/permission" --jq .permission)
-          .github/scripts/check-revocation.sh main change "$AUTHOR" "$permission"
+          actor=$(.github/scripts/revocation-actor.sh main change "$AUTHOR" "$APP")
+          permission=$(gh api "repos/$REPO/collaborators/$actor/permission" --jq .permission)
+          .github/scripts/check-revocation.sh main change "$actor" "$permission"
       - name: A change to a published opam file is the one its records make
         if: steps.kind.outputs.kind == 'apply'
         run: .github/scripts/check-apply.sh main change

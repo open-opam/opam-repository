@@ -3,12 +3,16 @@
 # request of its own, validated and merged like any. The registry's App opens
 # it, since a pull request opened with the workflow's token starts no check.
 # It runs on every push to main and starts again from main each time, so a
-# record that merged while the last edit waited is in the next one.
+# record that merged while the last edit waited is in the next one; and once a
+# day, after the download count, should a run after a merge have failed.
 name: Make opam files match their records
 
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: [Count downloads]
+    types: [completed]
 
 permissions: {}
 

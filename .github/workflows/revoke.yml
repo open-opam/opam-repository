@@ -1,0 +1,65 @@
+# The maintainer's revocation, for security, a legal reason or a gone release; an
+# author revokes their own with open-opam revoke. It is the one workflow a person
+# starts, since the decision is a person's: only someone who can write to this
+# repository can start it, and the record says who it was. The registry's App
+# opens the pull request, so it is checked and merged like any, and apply makes
+# the opam files match once it merges.
+name: Revoke a release
+run-name: "Revoke ${{ inputs.name }} ${{ inputs.version || 'every version' }} (${{ inputs.reason }})"
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: The package
+        required: true
+      version:
+        description: The version, or empty for every version
+        required: false
+      reason:
+        description: Why
+        required: true
+        type: choice
+        options: [security, legal, upstream-gone]
+      evidence:
+        description: A link to what shows why, starting with https://
+        required: true
+
+permissions: {}
+
+jobs:
+  revoke:
+    runs-on: ubuntu-24.04
+    environment: registry
+    env:
+      REPO: ${{ github.repository }}
+      NAME: ${{ inputs.name }}
+      VERSION: ${{ inputs.version }}
+      REASON: ${{ inputs.reason }}
+      EVIDENCE: ${{ inputs.evidence }}
+      ACTOR: ${{ github.actor }}
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app
+        with:
+          client-id: ${{ vars.REGISTRY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.REGISTRY_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          token: ${{ steps.app.outputs.token }}
+      - name: Add a record for each version
+        run: .github/scripts/revoke.sh "$NAME" "$VERSION" "$REASON" "$EVIDENCE" "$ACTOR"
+      - name: Open the pull request
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP: ${{ steps.app.outputs.app-slug }}
+        run: |
+          branch="revoke/$GITHUB_RUN_ID"
+          git config user.name "$APP[bot]"
+          git config user.email "$APP[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add .open-opam/revocations
+          git commit -qm "Revoke $NAME $VERSION" -m "Reason: $REASON. Evidence: $EVIDENCE"
+          git push -q origin "$branch"
+          gh pr create -R "$REPO" --base main --head "$branch" --title "Revoke $NAME $VERSION" --body "Reason: $REASON. Evidence: $EVIDENCE. Actor: $ACTOR."

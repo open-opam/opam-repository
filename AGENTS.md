@@ -13,8 +13,11 @@ packages/<name>/<name>.<version>/opam  one published version of a package
 .open-opam/revocations/                a record for each revoked version
 .open-opam/restorations/               a record for each version its author restored
 .github/workflows/validate             every gate, on one exact commit, chosen by what it changes; then the merge, by the registry's App
+.github/workflows/revoke               the maintainer's revocation: a form, whose records the registry's App proposes
 .github/workflows/apply                opens the pull request that makes each opam file match its records
 .github/scripts/kind.sh                what a pull request changes, which decides its gate
+.github/scripts/revoke.sh              a maintainer's revocation records, written from the form
+.github/scripts/revocation-actor.sh    whom a maintainer's revocation is held to
 .github/scripts/check-revocation.sh    a maintainer's revocation, judged
 .github/scripts/check-apply.sh         a change to published opam files, judged against the records
 .github/scripts/apply-records.sh       every record applied
@@ -45,18 +48,23 @@ GitHub counts each release asset since it was uploaded.
   branch that changes an existing file.
 - **What a pull request changes decides its gate, never where it comes from.** A
   change to a published opam file passes only when it is exactly what the
-  records make. Why: a branch of this repository could otherwise add a version
-  with no release, or change a published one. Symptom: a gate that asks which
-  repository a pull request's head is in.
+  records make. The one thing asked of who opened it is whom a maintainer's
+  revocation is held to: its author, or, when the registry's App opened it for
+  the form, whoever its records name. Why: a branch of this repository could
+  otherwise add a version with no release, or change a published one. Symptom:
+  a gate that asks which repository a pull request's head is in.
 - **The registry's App holds no exemption.** It merges and opens pull requests so
   that GitHub starts what follows, and `main` refuses it without the check like
   anyone. Its key is in the `registry` environment, which only `main` reaches.
   Why: a workflow's own token starts no workflow, and nothing may reach `main`
   unchecked. Symptom: the App in a bypass list, a push to `main` that is not a
   merge, or its key in a job that holds a pull request's files.
-- **A maintainer revokes with a pull request that adds a record**, naming
-  themselves as its actor. Why: nothing in the registry is started by hand, and
-  the record says who it was. Symptom: a workflow with `workflow_dispatch`.
+- **A maintainer's revocation is the one thing a person starts**, with the
+  `revoke` form or a pull request adding the record themselves; the record
+  names them, and the check holds them to be able to write here. Everything
+  after it runs by itself. Why: only a person can say a release is unsafe,
+  unlawful or gone. Symptom: a step after the form that waits for someone, or
+  another workflow that only runs when started by hand.
 
 - **A published version never changes.** Its opam file stays as published; a
   correction is a new version. The one change is `apply`'s, making it match its
