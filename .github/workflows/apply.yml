@@ -1,18 +1,14 @@
-# Makes each opam file match its records: a version with a revocation and no
-# restoration is unavailable, and a restored one holds the bytes it was published
-# with. A pull request only adds records, so an author's fork never carries this
-# edit; the registry makes it, in a pull request of its own, validated like any.
-# The check starts it after each merge it makes; making a file match twice
-# changes nothing.
+# Makes each opam file match its records. A pull request only adds records, so
+# an author's fork never carries this edit; the registry makes it, in a pull
+# request of its own, validated and merged like any. The registry's App opens
+# it, since a pull request opened with the workflow's token starts no check.
+# It runs on every push to main and starts again from main each time, so a
+# record that merged while the last edit waited is in the next one.
 name: Make opam files match their records
 
 on:
-  workflow_dispatch:
-  # Once a day as well, after the download count, should a start after a merge
-  # have failed.
-  workflow_run:
-    workflows: [Count downloads]
-    types: [completed]
+  push:
+    branches: [main]
 
 permissions: {}
 
@@ -22,38 +18,34 @@ concurrency:
 jobs:
   apply:
     runs-on: ubuntu-24.04
-    permissions:
-      actions: write
-      contents: write
-      pull-requests: write
+    environment: registry
     env:
-      GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app
+        with:
+          client-id: ${{ vars.REGISTRY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.REGISTRY_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v5
         with:
           ref: main
           # A restoration reads the bytes a version was published with from history.
           fetch-depth: 0
+          token: ${{ steps.app.outputs.token }}
       - name: Make each opam file match its records
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP: ${{ steps.app.outputs.app-slug }}
         run: |
-          if [ -n "$(gh pr list -R "$REPO" --head apply --state open --json number --jq '.[].number')" ]; then
-            echo "The last change is still waiting to merge."; exit 0
-          fi
-          for record in .open-opam/revocations/*.json .open-opam/restorations/*.json; do
-            [ -f "$record" ] || continue
-            case "$record" in
-              .open-opam/revocations/*)
-                [ -f ".open-opam/restorations/$(basename "$record")" ] && continue ;;
-            esac
-            .github/scripts/apply-record.sh "$record"
-          done
+          .github/scripts/apply-records.sh
           if git diff --quiet; then exit 0; fi
           title="Apply $(git diff --name-only | cut -d/ -f3 | paste -sd' ' -)"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "$APP[bot]"
+          git config user.email "$APP[bot]@users.noreply.github.com"
           git switch -c apply
           git commit -qam "$title"
           git push -q --force origin apply
-          url=$(gh pr create --base main --head apply --title "$title" --body "Makes the opam files match their records.")
-          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)" -f merge=true
+          if [ -z "$(gh pr list -R "$REPO" --head apply --state open --json number --jq '.[].number')" ]; then
+            gh pr create -R "$REPO" --base main --head apply --title "$title" --body "Makes the opam files match their records."
+          fi

@@ -20,8 +20,9 @@ switch:
 	opam update --switch=$(SWITCH) open-opam
 	opam install --switch=$(SWITCH) --yes dune melange ppx_solidtype solidtype solidtype-kobalte solidtype-heroui
 
-test: ## the script that makes an opam file match a record
+test: ## the scripts that judge a pull request and make an opam file match a record
 	sh .github/scripts/test-apply-record.sh
+	sh .github/scripts/test-gates.sh
 
 docs/node_modules: docs/package.json docs/bun.lock
 	@command -v bun >/dev/null 2>&1 || { echo "The catalogue needs Bun 1.3 or later."; exit 1; }
