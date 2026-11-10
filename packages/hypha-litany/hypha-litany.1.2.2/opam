@@ -1,0 +1,42 @@
+opam-version: "2.0"
+synopsis: "The linter for modern OCaml"
+description:
+  "Litany examines OCaml sources and reports style and correctness issues, so they can be faced and fixed rather than silenced."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Thibaut Mattio <thibaut.mattio@gmail.com>"]
+license: "ISC"
+tags: ["linter" "static-analysis" "developer-tools" "ocaml"]
+homepage: "https://github.com/hyphatech/litany"
+doc: "https://hyphatech.github.io/litany/"
+bug-reports: "https://github.com/hyphatech/litany/issues"
+depends: [
+  "dune" {>= "3.23"}
+  "ocaml" {>= "5.5.0" & < "5.6.0"}
+  "cmdliner" {>= "2.0.0"}
+  "windtrap" {with-test & >= "0.3.1"}
+  "ppx_windtrap" {with-test & >= "0.3.1"}
+  "thumper" {with-test & >= "0.1.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/litany.git"
+x-maintenance-intent: ["(latest)"]
+x-open-opam: true
+x-commit-hash: "b58658ef972fe9e5512b605229caf7974b9b48ed"
+url {
+  src: "https://github.com/hyphatech/litany/releases/download/1.2.2/litany-1.2.2.tar.gz"
+  checksum: "sha256=cdf35db6f7d8b181c570fa4028e43f24011ca2b88ae4e7be7f5bd141d5081a66"
+}
