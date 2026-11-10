@@ -1,0 +1,44 @@
+opam-version: "2.0"
+synopsis:
+  "A Postgres database a test run owns, in Podman or a server it is handed"
+description:
+  "A server for a test run -- one it is handed, or one it starts in Podman and removes -- and a database of its own in it for each case, dropped after; a container a killed run left is removed by the next."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/rowtype"
+bug-reports: "https://github.com/hyphatech/rowtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "rowtype" {= version}
+  "rowtype-postgres" {= version}
+  "eio" {>= "1.5"}
+  "mtime" {>= "2.1.0"}
+  "logs" {>= "0.10.0"}
+  "eio_main" {>= "1.5"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/rowtype.git"
+x-maintenance-intent: ["(latest)"]
+x-open-opam: true
+x-commit-hash: "ea7ebe781d9457a04d4ccabbe3e6b063e0865e6d"
+url {
+  src: "https://github.com/hyphatech/rowtype/releases/download/0.10.2/rowtype-0.10.2.tar.gz"
+  checksum: "sha256=bd723f701eafd86d819b62b8b700fe89824c047f41a8e01dc6b89af384c38aa0"
+}
