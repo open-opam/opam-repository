@@ -22,7 +22,7 @@ on:
         type: choice
         options: [security, legal, upstream-gone]
       evidence:
-        description: A link to what shows why, starting with https://
+        description: What shows why, a link where there is one
         required: true
 
 permissions: {}

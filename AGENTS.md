@@ -64,7 +64,7 @@ GitHub counts each release asset since it was uploaded.
   names them, and the check holds them to be able to write here. Everything
   after it runs by itself. Why: only a person can say a release is unsafe,
   unlawful or gone. Symptom: a step after the form that waits for someone, or
-  another workflow that only runs when started by hand.
+  `workflow_dispatch` on any other workflow.
 
 - **A published version never changes.** Its opam file stays as published; a
   correction is a new version. The one change is `apply`'s, making it match its

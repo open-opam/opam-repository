@@ -82,12 +82,8 @@ else
 fi
 is "the form's records pass as a maintainer's" revocation pass admin
 change
-if "$scripts/revoke.sh" foo 1.0.0 security "not a link" alice > /dev/null; then
-  echo "FAILED: the form refuses evidence that is no link"; failed=1
-else
-  echo "ok: the form refuses evidence that is no link"
-fi
-git checkout -q main
+"$scripts/revoke.sh" foo 1.0.0 legal "A letter received on 10 November." alice
+is "evidence is whatever shows why, a link or not" revocation pass admin
 
 record foo.1.0.0 "$by_alice"
 git add -A

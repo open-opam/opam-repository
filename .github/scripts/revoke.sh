@@ -11,7 +11,7 @@ actor=$5
 
 case "$name" in *[!A-Za-z0-9_+-]* | '') echo "$name is not a package name."; exit 1 ;; esac
 case "$version" in *[!A-Za-z0-9_.+~-]*) echo "$version is not a version."; exit 1 ;; esac
-case "$evidence" in https://*) ;; *) echo "The evidence is a link starting with https://."; exit 1 ;; esac
+case "$evidence" in '') echo "A revocation says what shows why."; exit 1 ;; esac
 if [ ! -d "packages/$name" ]; then
   echo "The registry holds no package named $name."
   exit 1
