@@ -1,0 +1,25 @@
+{
+  "taken_at": "2026-11-10T10:19:49.283Z",
+  "assets": [
+    {
+      "url": "https://github.com/hyphatech/litany/releases/download/1.2.2/litany-1.2.2.tar.gz",
+      "downloads": 5
+    },
+    {
+      "url": "https://github.com/hyphatech/postgres-eio/releases/download/0.5.2/postgres-eio-0.5.2.tar.gz",
+      "downloads": 8
+    },
+    {
+      "url": "https://github.com/hyphatech/solidtype/releases/download/0.7.1/solidtype-0.7.1.tar.gz",
+      "downloads": 9
+    },
+    {
+      "url": "https://github.com/hyphatech/wiretype/releases/download/0.7.0/wiretype-0.7.0.tar.gz",
+      "downloads": 18
+    },
+    {
+      "url": "https://github.com/open-opam/open-opam-cli/releases/download/0.5.0/open-opam-cli-0.5.0.tar.gz",
+      "downloads": 7
+    }
+  ]
+}
