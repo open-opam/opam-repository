@@ -1,0 +1,39 @@
+opam-version: "2.0"
+synopsis: "Kobalte for solidtype: Solid's accessible components, typed"
+description:
+  "Every component of Kobalte 0.13, part by part, its hooks and utilities, for OCaml front ends on Solid written with solidtype. Generated from Kobalte's own declarations."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/solidtype"
+bug-reports: "https://github.com/hyphatech/solidtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "melange" {>= "7.0.1-55"}
+  "solidtype" {= version}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/solidtype.git"
+x-maintenance-intent: ["(latest)"]
+x-npm-depends: [ "@kobalte/core@~0.13.14" ]
+x-open-opam: true
+x-commit-hash: "fc399f4128fef6e89688f0542cb83506fabcc76b"
+url {
+  src: "https://github.com/hyphatech/solidtype/releases/download/0.7.1/solidtype-0.7.1.tar.gz"
+  checksum: "sha256=e7efd2ef782e21f9d8b8816540f27f863b65f2d913c6fdaa9ce4f741eec8709f"
+}
