@@ -1,6 +1,6 @@
-<h1>
-  <img src="docs/public/logo.svg" alt="" width="64" align="left">&nbsp;open-opam
-</h1>
+<img src="docs/public/logo.svg" alt="" width="72">
+
+# open-opam
 
 Self-service opam repository. Open OCaml publishing for humans and agents.
 
@@ -12,17 +12,6 @@ Self-service opam repository. Open OCaml publishing for humans and agents.
 opam repo add open-opam https://github.com/open-opam/opam-repository.git
 opam install <package>
 ```
-
-## Publish
-
-```sh
-opam install open-opam
-open-opam init
-open-opam release 1.2.3
-open-opam publish 1.2.3
-```
-
-What a release needs: [publishing](https://open-opam.github.io/opam-repository/publish/).
 
 ## Licence
 
