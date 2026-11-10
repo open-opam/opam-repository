@@ -1,0 +1,49 @@
+opam-version: "2.0"
+synopsis: "Durable jobs for modern OCaml, backed by Postgres"
+description:
+  "A job is a row written in the transaction that made it owed, claimed by a runner under a lease, run outside any transaction, retried with backoff and finished once, however often it was attempted."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/spool"
+bug-reports: "https://github.com/hyphatech/spool/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "rowtype" {>= "0.10.0" & < "0.11.0"}
+  "rowtype-postgres" {>= "0.10.0" & < "0.11.0"}
+  "ptime" {>= "1.2.0"}
+  "wiretype" {>= "0.7.0" & < "0.8.0"}
+  "eio" {>= "1.5"}
+  "logs" {>= "0.10.0"}
+  "mtime" {>= "2.1.0"}
+  "eio_main" {with-test & >= "1.5"}
+  "alcotest" {with-test & >= "1.9.1"}
+  "merlin" {with-dev-setup & >= "5.6-504"}
+  "ocaml-lsp-server" {with-dev-setup & >= "1.25.0"}
+  "ocamlformat" {with-dev-setup & = "0.29.0"}
+  "odoc" {with-dev-setup & >= "3.2.1"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/spool.git"
+x-maintenance-intent: ["(latest)"]
+x-open-opam: true
+x-commit-hash: "6d85d323e04dd8c5eba4000a44570dec7de78ae8"
+url {
+  src: "https://github.com/hyphatech/spool/releases/download/0.6.0/spool-0.6.0.tar.gz"
+  checksum: "sha256=85d2001a58febee6ae46408b0089316ede0d32aebef5e980f5d4915e7baad653"
+}
