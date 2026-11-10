@@ -4,7 +4,7 @@
 # edit; the registry makes it, in a pull request of its own, validated like any.
 # It runs on a schedule, since a merge made with the workflow token, as
 # auto-merge's is, starts no workflow; making a file match twice changes nothing.
-name: apply
+name: Make opam files match their records
 
 on:
   schedule:

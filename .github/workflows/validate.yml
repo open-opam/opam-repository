@@ -2,7 +2,8 @@
 # runs the validator main names, so a submission cannot weaken its own gate.
 # Package code runs only in the install job, which has nothing worth taking, and
 # which no other job relies on: no cache is restored and no artifact is read.
-name: validate
+name: Check a pull request
+run-name: "Check pull request #${{ inputs.pr }}"
 
 on:
   workflow_dispatch:

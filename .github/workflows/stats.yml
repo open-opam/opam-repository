@@ -1,7 +1,7 @@
 # Once a day, each archive's download count from GitHub, saved as one snapshot
 # on the stats branch, never on main: main's history records publications. The
 # catalogue shows a day's downloads as the difference of two snapshots.
-name: stats
+name: Count downloads
 
 on:
   schedule:

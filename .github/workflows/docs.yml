@@ -7,7 +7,8 @@
 # the build runs a package's code: it has only a read token, and the token
 # that publishes Pages is in a job of its own that runs nothing but the
 # deployment.
-name: docs
+name: Deploy the catalogue
+run-name: Deploy the catalogue
 
 on:
   push:
@@ -15,7 +16,7 @@ on:
   # A snapshot is pushed with the workflow's own token, which starts no
   # workflow, so the catalogue follows the stats run instead.
   workflow_run:
-    workflows: [stats]
+    workflows: [Count downloads]
     types: [completed]
   # Auto-merge merges with the workflow's token too, so a publication merged by
   # itself starts nothing either; this catches up, building only when main has
