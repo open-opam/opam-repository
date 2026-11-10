@@ -12,13 +12,13 @@ packages/<name>/<name>.<version>/opam  one published version of a package
 .open-opam/owners/<name>.json          the repository that owns a name
 .open-opam/revocations/                a record for each revoked version
 .open-opam/restorations/               a record for each version its author restored
-.github/workflows/pr                   lets a first-time contributor be validated
-.github/workflows/validate             every gate, on one exact commit
+.github/workflows/pr                   lets a first-time contributor be validated, with no click
+.github/workflows/validate             every gate, on one exact commit, then the merge, apply and the catalogue
 .github/workflows/revoke               the maintainer's revocation: adds its records
 .github/workflows/apply                makes each opam file match its records
 .github/scripts/apply-record.sh        one record applied: available: false, or the published bytes back
 .github/actions/install-cli            the exact CLI release the registry runs
-.github/workflows/docs                 the catalogue on GitHub Pages: on a push to main, after a snapshot, and after an auto-merge
+.github/workflows/docs                 the catalogue on GitHub Pages: on a push to main, after a snapshot, and after the check's merge
 .github/workflows/stats                each archive's downloads, once a day, onto the stats branch
 docs/                                  the catalogue: Astro, reading packages/, .open-opam/, the registry's documents, GitHub releases and the stats branch
 docs/islands/                          its interactive parts: OCaml with solidtype and HeroUI, compiled by Melange
@@ -37,9 +37,9 @@ GitHub counts each release asset since it was uploaded.
 
 - **A pull request only adds files**: a release's opam files and owners records,
   or revocation and restoration records. `apply` makes the opam files match the
-  records, on a schedule. Why: an author's fork is usually behind, and GitHub
+  records, after each merge. Why: an author's fork is usually behind, and GitHub
   refuses to bring it up to date without a permission an author should never
-  need; and a merge made with the workflow token, as auto-merge's is, starts no
+  need; and a merge made with the workflow token, as the check's is, starts no
   workflow. Symptom: a fork's pull request that changes an existing file.
 
 - **A published version never changes.** Its opam file stays as published; a

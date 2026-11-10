@@ -45,3 +45,15 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -q -m "Count downloads on $day"
           git push origin stats
+
+  # GitHub disables a public repository's schedule after 60 days with no
+  # activity, and this schedule is what everything else falls back on.
+  # Enabling it again each day restarts that count.
+  keep-scheduled:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/stats.yml/enable"

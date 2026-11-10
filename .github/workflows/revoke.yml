@@ -68,5 +68,4 @@ jobs:
           git commit -qm "Revoke $NAME $VERSION" -m "Reason: $REASON. Evidence: $EVIDENCE"
           git push -q origin "$branch"
           url=$(gh pr create --base main --head "$branch" --title "Revoke $NAME $VERSION" --body "Reason: $REASON. Evidence: $EVIDENCE. Actor: $ACTOR.")
-          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)"
-          gh pr merge "${url##*/}" --auto --squash -R "$REPO"
+          gh workflow run validate.yml -R "$REPO" --ref main -f pr="${url##*/}" -f sha="$(git rev-parse HEAD)" -f merge=true

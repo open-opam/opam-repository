@@ -14,6 +14,10 @@ on:
       sha:
         description: The exact head commit to validate
         required: true
+      merge:
+        description: Merge it once it passes, then apply its records and rebuild the catalogue
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -113,6 +117,8 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       checks: write
+    outputs:
+      conclusion: ${{ steps.post.outputs.conclusion }}
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
@@ -121,7 +127,8 @@ jobs:
       INSTALL: ${{ needs.install.result }}
       KIND: ${{ needs.gates.outputs.kind }}
     steps:
-      - name: Post the required check, from the jobs' results alone
+      - id: post
+        name: Post the required check, from the jobs' results alone
         run: |
           conclusion=failure
           if [ "$GATES" = success ]; then
@@ -130,3 +137,35 @@ jobs:
             if [ "$KIND" = publication ] && [ "$INSTALL" = success ]; then conclusion=success; fi
           fi
           gh api "repos/$REPO/check-runs" -X POST -f name=validate -f head_sha="$SHA" -f status=completed -f conclusion="$conclusion" --silent
+          echo "conclusion=$conclusion" >> "$GITHUB_OUTPUT"
+
+  # A merge made with the workflow token starts no workflow, so this merge
+  # starts what must follow it by name, which GitHub allows: apply, for the
+  # records it may have added, and the catalogue.
+  merge:
+    needs: report
+    if: inputs.merge && needs.report.outputs.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR: ${{ inputs.pr }}
+      SHA: ${{ inputs.sha }}
+    steps:
+      - name: Merge the commit that passed, and nothing pushed since
+        run: gh pr merge "$PR" --squash --delete-branch --match-head-commit "$SHA" -R "$REPO"
+      # Should GitHub refuse a start five times, the daily download count
+      # starts apply and the catalogue again.
+      - name: Start apply and the catalogue
+        run: |
+          for workflow in apply.yml docs.yml; do
+            for attempt in 1 2 3 4 5; do
+              gh workflow run "$workflow" -R "$REPO" --ref main && continue 2
+              sleep $((attempt * 15))
+            done
+            exit 1
+          done
