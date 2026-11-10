@@ -59,6 +59,32 @@ change; record foo.1.0.0 "$by_alice"; record foo.2.0.0 "$by_author"; is "a maint
 
 change; echo 'available: false' >> packages/foo/foo.2.0.0/opam; is "an edit no record asks for is refused" apply fail
 
+# held <case> <author> <whom it is held to, or refused>
+held() {
+  git add -A
+  git commit -qm change
+  git checkout -q main
+  actor=$("$scripts/revocation-actor.sh" main change "$2" 'app[bot]' 2> /dev/null) || actor=refused
+  if [ "$actor" = "$3" ]; then echo "ok: $1"; else echo "FAILED: $1: $actor"; failed=1; fi
+}
+
+change; record foo.1.0.0 "$by_alice"; held "a revocation is held to whoever opened it" bob bob
+change; record foo.1.0.0 "$by_alice"; held "the form's is held to whoever its record names" 'app[bot]' alice
+change; record foo.1.0.0 '{"reason":"security"}'; held "the form's record names somebody" 'app[bot]' refused
+
+change
+if "$scripts/revoke.sh" foo "" security https://e alice > /dev/null \
+  && [ "$(ls .open-opam/revocations)" = "foo.1.0.0.json
+foo.2.0.0.json" ]; then
+  echo "ok: the form writes a record for every version"
+else
+  echo "FAILED: the form writes a record for every version"; failed=1
+fi
+is "the form's records pass as a maintainer's" revocation pass admin
+change
+"$scripts/revoke.sh" foo 1.0.0 legal "A letter received on 10 November." alice
+is "evidence is whatever shows why, a link or not" revocation pass admin
+
 record foo.1.0.0 "$by_alice"
 git add -A
 git commit -qm "a revocation merged"

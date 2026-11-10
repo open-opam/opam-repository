@@ -31,10 +31,10 @@ git diff --name-status --no-renames "$base...$head" | tr '\t' ' ' | while read -
     (keys == ["actor", "evidence", "reason", "revoked_at"])
     and (.reason | IN("security", "legal", "upstream-gone"))
     and .actor == $actor
-    and (.evidence | type == "string" and test("^https://"))
+    and (.evidence | type == "string" and length > 0)
     and (.revoked_at | type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"))
   ' > /dev/null; then
-    echo "$path: the record holds a reason, $author as its actor, a link as its evidence, and a time."
+    echo "$path: the record holds a reason, $author as its actor, its evidence, and a time."
     exit 1
   fi
 done
