@@ -3,6 +3,10 @@ DOCS_PORT ?= 4321
 # publishes it: the switch takes it from the registry, as any author would.
 SWITCH ?= open-opam-catalogue
 OPAM := opam exec --switch=$(SWITCH) --
+# GitHub answers 60 requests an hour without a token, fewer than one build of
+# the catalogue makes.
+GITHUB_TOKEN ?= $(shell gh auth token 2>/dev/null)
+export GITHUB_TOKEN
 
 .DEFAULT_GOAL := help
 .PHONY: help setup switch islands test docs docs-serve stats
@@ -18,7 +22,7 @@ switch:
 	@opam repo list --switch=$(SWITCH) --short | grep -qx open-opam \
 	  || opam repo add open-opam https://github.com/open-opam/opam-repository.git --this-switch --switch=$(SWITCH)
 	opam update --switch=$(SWITCH) open-opam
-	opam install --switch=$(SWITCH) --yes dune melange ppx_solidtype solidtype solidtype-kobalte solidtype-heroui
+	opam install --switch=$(SWITCH) --yes dune melange ppx_solidtype solidtype solidtype-kobalte solidtype-heroui solidtype-gravity-icons
 
 test: ## the scripts that judge a pull request and make an opam file match a record
 	sh .github/scripts/test-apply-record.sh

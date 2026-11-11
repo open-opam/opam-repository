@@ -3,7 +3,7 @@
 // by the island, its first page rendered here.
 import Base from "../../layouts/Base.astro";
 import * as PackageList from "@islands/package_list.jsx";
-import Boxes from "@lucide/astro/icons/boxes";
+import Boxes from "@gravity-ui/icons/svgs/boxes-3.svg";
 import { packages } from "../../lib/registry";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -22,7 +22,7 @@ const rows = packages.map((p) => ({
 
 <Base title="Packages · open-opam" description="Every package in the open-opam registry.">
   <div class="package-index">
-    <h1 class="page-title"><Boxes size={28} />Packages</h1>
+    <h1 class="page-title"><Boxes width={28} height={28} aria-hidden="true" />Packages</h1>
     <PackageList.make client:load packages={rows} />
   </div>
 </Base>

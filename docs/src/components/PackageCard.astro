@@ -1,9 +1,9 @@
 ---
 // A package in a list, as a HeroUI card: its name, latest version, synopsis,
 // and when it was last published.
-import Package from "@lucide/astro/icons/package";
-import Calendar from "@lucide/astro/icons/calendar";
-import Download from "@lucide/astro/icons/download";
+import Box from "@gravity-ui/icons/svgs/box.svg";
+import Calendar from "@gravity-ui/icons/svgs/calendar.svg";
+import ArrowDownToLine from "@gravity-ui/icons/svgs/arrow-down-to-line.svg";
 import type { Package as Pkg } from "../lib/registry";
 
 interface Props {
@@ -19,13 +19,13 @@ const day = (date: string) =>
 
 <a class="card card--default card-link" href={`${base}/packages/${pkg.name}/`}>
   <span class="package-card-head">
-    <span class="package-icon"><Package size={18} /></span>
+    <span class="package-icon"><Box width={18} height={18} aria-hidden="true" /></span>
     <strong>{pkg.name}</strong>
     <span class="chip chip--sm chip--secondary"><span class="chip__label">{pkg.latest.version}</span></span>
   </span>
   {pkg.latest.synopsis && <span class="package-card-synopsis">{pkg.latest.synopsis}</span>}
   <span class="package-card-meta">
-    {pkg.latest.published && <span><Calendar size={13} />{day(pkg.latest.published)}</span>}
-    {downloads !== undefined && <span><Download size={13} />{downloads.toLocaleString("en-GB")} downloads</span>}
+    {pkg.latest.published && <span><Calendar width={13} height={13} aria-hidden="true" />{day(pkg.latest.published)}</span>}
+    {downloads !== undefined && <span><ArrowDownToLine width={13} height={13} aria-hidden="true" />{downloads.toLocaleString("en-GB")} downloads</span>}
   </span>
 </a>

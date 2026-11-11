@@ -1,7 +1,7 @@
 # Disputes
 
 For a dispute over a package name, or a legal takedown request. Report a
-security problem through [SECURITY.md](SECURITY.md) instead.
+security problem through [Security](SECURITY.md) instead.
 
 ## How to raise one
 
@@ -16,11 +16,6 @@ metadata, prior publication, and trademark.
 
 - No action.
 - Revoke the versions concerned, with a public record.
-- Transfer the name, by changing its owners record and revoking the old
-  versions.
-
-A transferred name starts at a new version. The old version numbers are not
-freed, because a published version is never replaced.
 
 A name that appears in official opam from another repository, after it was first
 published here, is settled by a dispute like any other; official opam's review is
