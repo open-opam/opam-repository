@@ -1,0 +1,43 @@
+opam-version: "2.0"
+synopsis: "HeroUI for solidtype: HeroUI's design on Kobalte's components"
+description:
+  "HeroUI's components, ported by hand to solidtype on Kobalte: HeroUI's classes and the state its styles read, Kobalte's behaviour and accessibility."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/solidtype"
+bug-reports: "https://github.com/hyphatech/solidtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "melange" {>= "7.0.1-55"}
+  "solidtype" {= version}
+  "solidtype-kobalte" {= version}
+  "solidtype-headless" {= version}
+  "solidtype-internationalized-date" {= version}
+  "solidtype-gravity-icons" {= version}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/solidtype.git"
+x-maintenance-intent: ["(latest)"]
+x-npm-depends: [ "@heroui/styles@~3.2.6" ]
+x-open-opam: true
+x-commit-hash: "ba6d0c7ccd0fae7c3e01a1cdcdd5a73137acdecb"
+url {
+  src: "https://github.com/hyphatech/solidtype/releases/download/0.9.1/solidtype-0.9.1.tar.gz"
+  checksum: "sha256=2deb93c693789ce2d36b80ecf043bae88aac07b5049b41df8aa13a1e2a44d715"
+}

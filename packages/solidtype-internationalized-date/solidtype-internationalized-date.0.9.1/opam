@@ -1,0 +1,39 @@
+opam-version: "2.0"
+synopsis:
+  "@internationalized/date for solidtype: dates, times and time zones, typed"
+description:
+  "The dates of @internationalized/date 3, the values HeroUI's date components take: dates, times, date-times and zoned date-times, their calendars, arithmetic, time zones and formatting, for OCaml front ends compiled by Melange. Generated from its own declarations."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/solidtype"
+bug-reports: "https://github.com/hyphatech/solidtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "melange" {>= "7.0.1-55"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/solidtype.git"
+x-maintenance-intent: ["(latest)"]
+x-npm-depends: [ "@internationalized/date@~3.12.4" ]
+x-open-opam: true
+x-commit-hash: "ba6d0c7ccd0fae7c3e01a1cdcdd5a73137acdecb"
+url {
+  src: "https://github.com/hyphatech/solidtype/releases/download/0.9.1/solidtype-0.9.1.tar.gz"
+  checksum: "sha256=2deb93c693789ce2d36b80ecf043bae88aac07b5049b41df8aa13a1e2a44d715"
+}
