@@ -12,16 +12,16 @@ import * as Tabs from "@islands/package_tabs.jsx";
 import * as Versions from "@islands/versions_menu.jsx";
 import * as ListTable from "@islands/list_table.jsx";
 import * as Trail from "@islands/trail.jsx";
-import Tag from "@lucide/astro/icons/tag";
-import Terminal from "@lucide/astro/icons/terminal";
-import ShieldCheck from "@lucide/astro/icons/shield-check";
-import ChartLine from "@lucide/astro/icons/chart-line";
-import LinkIcon from "@lucide/astro/icons/link";
-import Flag from "@lucide/astro/icons/flag";
-import House from "@lucide/astro/icons/house";
-import Bug from "@lucide/astro/icons/bug";
-import Info from "@lucide/astro/icons/info";
-import Download from "@lucide/astro/icons/download";
+import Tag from "@gravity-ui/icons/svgs/tag.svg";
+import Terminal from "@gravity-ui/icons/svgs/terminal.svg";
+import ShieldCheck from "@gravity-ui/icons/svgs/shield-check.svg";
+import ChartLine from "@gravity-ui/icons/svgs/chart-line.svg";
+import Link from "@gravity-ui/icons/svgs/link.svg";
+import Flag from "@gravity-ui/icons/svgs/flag.svg";
+import House from "@gravity-ui/icons/svgs/house.svg";
+import Bug from "@gravity-ui/icons/svgs/bug.svg";
+import CircleInfo from "@gravity-ui/icons/svgs/circle-info.svg";
+import ArrowDownToLine from "@gravity-ui/icons/svgs/arrow-down-to-line.svg";
 import { find, repository, safeUrl, type Package, type Version } from "../lib/registry";
 
 interface Props {
@@ -112,7 +112,7 @@ const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state
       {!isLatest && (
         <div class="alert alert--accent">
           <div class="alert__content">
-            <div class="notice-line"><Info size={18} />A newer version is out: <a class="link" href={href(pkg.name)}>{pkg.name} {pkg.latest.version}</a></div>
+            <div class="notice-line"><CircleInfo width={18} height={18} aria-hidden="true" />A newer version is out: <a class="link" href={href(pkg.name)}>{pkg.name} {pkg.latest.version}</a></div>
           </div>
         </div>
       )}
@@ -166,7 +166,7 @@ const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state
 
     <aside class="side">
       <section class="card card--default">
-        <h2><Terminal size={16} />Install</h2>
+        <h2><Terminal width={16} height={16} aria-hidden="true" />Install</h2>
         <span class="field-label">Once, to add the registry</span>
         <Copy.make client:visible label="the command that adds the registry" code={`opam repo add open-opam https://github.com/${repository}.git`} />
         <span class="field-label">opam</span>
@@ -176,12 +176,12 @@ const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state
       </section>
 
       <section class="card card--default">
-        <h2><ChartLine size={16} />Details</h2>
+        <h2><ChartLine width={16} height={16} aria-hidden="true" />Details</h2>
         {downloads && downloads.days.length > 1 && <DownloadsChart days={downloads.days} />}
         <dl class="facts">
           {downloads && (
             <>
-              <div><dt>Downloads</dt><dd class="number with-icon"><Download size={18} />{count(downloads.total)}</dd></div>
+              <div><dt>Downloads</dt><dd class="number with-icon"><ArrowDownToLine width={18} height={18} aria-hidden="true" />{count(downloads.total)}</dd></div>
               {downloads.days.length > 0 && <div><dt>Last 30 days</dt><dd class="number">{count(lastThirty ?? 0)}</dd></div>}
             </>
           )}
@@ -198,19 +198,19 @@ const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state
       </section>
 
       <section class="card card--default">
-        <h2><LinkIcon size={16} />Links</h2>
+        <h2><Link width={16} height={16} aria-hidden="true" />Links</h2>
         <ul class="links">
-          {homepage && <li><a href={homepage}><House size={16} />Homepage</a></li>}
+          {homepage && <li><a href={homepage}><House width={16} height={16} aria-hidden="true" />Homepage</a></li>}
           {source && <li><a href={source}><GitHubMark size={16} />Source</a></li>}
-          {issues && <li><a href={issues}><Bug size={16} />Issues</a></li>}
-          {release && <li><a href={release}><Tag size={16} />Release {v.archive?.tag}</a></li>}
+          {issues && <li><a href={issues}><Bug width={16} height={16} aria-hidden="true" />Issues</a></li>}
+          {release && <li><a href={release}><Tag width={16} height={16} aria-hidden="true" />Release {v.archive?.tag}</a></li>}
         </ul>
-        <a class="report-link" href={`${github}/security/advisories/new`}><Flag size={14} />Report a malicious or vulnerable package</a>
+        <a class="report-link" href={`${github}/security/advisories/new`}><Flag width={14} height={14} aria-hidden="true" />Report a malicious or vulnerable package</a>
       </section>
 
       {v.sha256 && (
         <section class="card card--default">
-          <h2><ShieldCheck size={16} />Checksum</h2>
+          <h2><ShieldCheck width={16} height={16} aria-hidden="true" />Checksum</h2>
           <Copy.make client:visible label="the checksum" code={`sha256=${v.sha256}`} />
         </section>
       )}

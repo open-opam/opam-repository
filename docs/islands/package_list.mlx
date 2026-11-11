@@ -8,6 +8,7 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Index = Solidtype.Index
 module Chip = Solidtype_heroui.Chip
+module Gravity = Solidtype_gravity_icons
 module Pagination = Solidtype_heroui.Pagination
 module Segment = Solidtype_heroui.Segment
 module Table = Solidtype_heroui.Table
@@ -109,13 +110,7 @@ let%component make ~(packages : package array) () =
                   <Table.Cell><span class_="whitespace-nowrap">(fun () -> Jsx.string p.published_label)</span></Table.Cell>
                   <Table.Cell>
                     <span class_="package-list-downloads">
-                      <svg fill="none" view_box="0 0 24 24" aria_hidden=true>
-                        <path
-                          d="M12 15V3M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5"
-                          stroke="currentColor" stroke_width="2" stroke_linecap="round"
-                          stroke_linejoin="round"
-                        />
-                      </svg>
+                      <Gravity.Arrow_down_to_line aria_hidden=true />
                       (fun () -> Jsx.int p.downloads)
                     </span>
                   </Table.Cell>

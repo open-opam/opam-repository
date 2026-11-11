@@ -5,6 +5,7 @@ module Jsx = Solidtype.Jsx
 module Button = Solidtype_heroui.Button
 module Chip = Solidtype_heroui.Chip
 module Dropdown = Solidtype_heroui.Dropdown
+module Gravity = Solidtype_gravity_icons
 module Label = Solidtype_heroui.Label
 
 type version = { version : string; revoked : bool; href : string }
@@ -13,11 +14,14 @@ external assign : string -> unit = "assign" [@@mel.scope "window", "location"]
 
 let%component make ~(current : string) ~(versions : version array) () =
   <Dropdown>
-    <Button aria_label="Choose a version" size=`sm variant=`secondary>
-      (fun () -> Jsx.string (current ())) " ▾"
+    <Button aria_label=(fun () -> "Version " ^ current ()) size=`sm variant=`secondary>
+      (fun () -> Jsx.string (current ()))
+      <Gravity.Chevron_down class_="size-3.5" aria_hidden=true />
     </Button>
     <Dropdown.Popover class_="max-h-80 overflow-y-auto">
       <Dropdown.Menu
+        selection_mode=`single
+        selected_keys=(fun () -> [| current () |])
         on_action=(fun id ->
                     match
                       Array.find_opt
@@ -33,6 +37,7 @@ let%component make ~(current : string) ~(versions : version array) () =
               <Solidtype.Show when_=(fun () -> v.revoked)>
                 <Chip size=`sm color=`danger>"revoked"</Chip>
               </Solidtype.Show>
+              <Dropdown.Item_indicator />
             </Dropdown.Item>)
         </Solidtype.For>
       </Dropdown.Menu>

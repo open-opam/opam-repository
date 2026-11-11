@@ -6,6 +6,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Button = Solidtype_heroui.Button
+module Gravity = Solidtype_gravity_icons
 
 external write_text : string -> unit Js.Promise.t = "writeText"
 [@@mel.scope "navigator", "clipboard"]
@@ -39,24 +40,7 @@ let%component make ~(code : string) ~(label : string) () =
       aria_label=(fun () ->
                    (if S.get copied then "Copied " else "Copy ") ^ label ())
       on_click=copy>
-      <svg class_="copy-icon" fill="none" view_box="0 0 24 24">
-        <rect
-          x="9" y="9" width="13" height="13" rx="2"
-          stroke="currentColor" stroke_width="2" stroke_linecap="round"
-          stroke_linejoin="round"
-        />
-        <path
-          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-          stroke="currentColor" stroke_width="2" stroke_linecap="round"
-          stroke_linejoin="round"
-        />
-      </svg>
-      <svg class_="check-icon" fill="none" view_box="0 0 24 24">
-        <path
-          d="M20 6 9 17l-5-5"
-          stroke="currentColor" stroke_width="2.5" stroke_linecap="round"
-          stroke_linejoin="round"
-        />
-      </svg>
+      <Gravity.Copy class_="copy-icon" aria_hidden=true />
+      <Gravity.Check class_="check-icon" aria_hidden=true />
     </Button>
   </div>

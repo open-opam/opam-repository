@@ -4,8 +4,8 @@
 // system's setting is, chosen before the page paints.
 import "../styles/site.css";
 import * as Search from "@islands/search.jsx";
-import Boxes from "@lucide/astro/icons/boxes";
-import Upload from "@lucide/astro/icons/upload";
+import Boxes from "@gravity-ui/icons/svgs/boxes-3.svg";
+import ArrowUpFromLine from "@gravity-ui/icons/svgs/arrow-up-from-line.svg";
 import GitHubMark from "../components/GitHubMark.astro";
 import { packages, repository } from "../lib/registry";
 import { documents, href } from "../lib/documents";
@@ -41,13 +41,13 @@ const footer = [["Publish", `${base}/publish/`], ...documents.map((d) => [d.titl
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href={`${base}/`}><img class="brand-mark" src={`${base}/logo.svg`} alt="" width="32" height="32" />open-opam</a>
+        <a class="brand" href={`${base}/`} aria-label="open-opam"><img class="brand-mark" src={`${base}/logo.svg`} alt="" width="32" height="32" /><span class="brand-name">open-opam</span></a>
         <div class="site-search">
           <Search.make client:idle packages={searchable} base={base} />
         </div>
         <nav class="site-nav" aria-label="Site">
-          <a class="button button--ghost button--sm" href={`${base}/packages/`}><Boxes size={16} /><span class="nav-text">Packages</span></a>
-          <a class="button button--ghost button--sm" href={`${base}/publish/`}><Upload size={16} /><span class="nav-text">Publish</span></a>
+          <a class="button button--ghost button--sm" href={`${base}/packages/`}><Boxes width={16} height={16} aria-hidden="true" /><span class="nav-text">Packages</span></a>
+          <a class="button button--ghost button--sm" href={`${base}/publish/`}><ArrowUpFromLine width={16} height={16} aria-hidden="true" /><span class="nav-text">Publish</span></a>
           <a class="button button--ghost button--sm button--icon-only" href={github} aria-label="open-opam on GitHub"><GitHubMark /></a>
         </nav>
       </div>

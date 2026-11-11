@@ -1,7 +1,8 @@
 /* The catalogue's theme, OCaml's colours: its camel's orange is the accent,
    and HeroUI's cool blue-grey neutrals are warmed towards it, as ocaml.org's
-   are. Only hues change; each lightness stays HeroUI's, so its contrasts
-   hold. A pair of blocks, as HeroUI's theming page writes one; site.css
+   are. The neutrals keep HeroUI's lightness, so its contrasts hold. The
+   orange is deepened until white text on it reads at 4.5:1, and darkens
+   further on hover, where HeroUI's would lighten it below that. A pair of blocks, as HeroUI's theming page writes one; site.css
    imports it into the theme layer, and the layout sets data-theme to one of
    them beside HeroUI's own .dark class, which its dark: variant reads. Each
    block sets only what it changes; the rest is HeroUI's default theme. */
@@ -11,8 +12,9 @@
   [data-theme="ocaml"] {
     color-scheme: light;
 
-    --accent: oklch(0.64 0.17 45);
+    --accent: oklch(0.555 0.165 45);
     --accent-foreground: var(--snow);
+    --accent-hover: color-mix(in oklab, var(--accent) 88%, var(--black));
     --eclipse: oklch(0.21 0.008 50);
 
     --background: oklch(0.975 0.004 70);
@@ -25,16 +27,17 @@
     --separator: oklch(0.92 0.007 60);
 
     /* HeroUI's links take --link, the text's colour; here a link is the
-       accent, deepened on the light background so its text is legible. */
-    --link: color-mix(in oklab, var(--accent) 80%, var(--black));
+       accent, which reads on the light background as it is. */
+    --link: var(--accent);
   }
 
   /* OCaml dark */
   [data-theme="ocaml-dark"] {
     color-scheme: dark;
 
-    --accent: oklch(0.64 0.17 45);
+    --accent: oklch(0.555 0.165 45);
     --accent-foreground: var(--snow);
+    --accent-hover: color-mix(in oklab, var(--accent) 88%, var(--black));
     --eclipse: oklch(0.21 0.008 50);
 
     --background: oklch(0.15 0.006 50);

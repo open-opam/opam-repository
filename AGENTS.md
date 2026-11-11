@@ -102,9 +102,6 @@ GitHub counts each release asset since it was uploaded.
   sanitised as GitHub sanitises one.** Why: it is untrusted input shown on the
   registry's own address. Symptom: `set:html` on anything but
   `renderReadme`'s output, or a README rendered without `rehype-sanitize`.
-- **A download count is the archive's, and says so.** Why: every package of a
-  release shares its archive, and GitHub counts the asset. Symptom: a count
-  shown without the archive's name, or added up across a release's packages.
 - **The catalogue is built with solidtype as this registry publishes it, in a
   job that holds only a read token.** Its islands install solidtype from the
   registry, which runs a package's build; the token that publishes Pages is in
