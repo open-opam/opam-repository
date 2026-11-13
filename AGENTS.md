@@ -12,11 +12,13 @@ packages/<name>/<name>.<version>/opam  one published version of a package
 .open-opam/owners/<name>.json          the repository that owns a name
 .open-opam/revocations/                a record for each revoked version
 .open-opam/restorations/               a record for each version its author restored
+.open-opam/blocked/<account id>.json   an account none of whose repositories publishes, for a package revoked as malicious
 .github/workflows/validate             every gate, on one exact commit, chosen by what it changes; then the merge, by the registry's App
 .github/workflows/revoke               the maintainer's revocation: a form, whose records the registry's App proposes
 .github/workflows/apply                opens the pull request that makes each opam file match its records
 .github/scripts/kind.sh                what a pull request changes, which decides its gate
 .github/scripts/revoke.sh              a maintainer's revocation records, written from the form
+.github/scripts/owner-account.sh       the account that owns a package's repository, which a malicious one's block names
 .github/scripts/revocation-actor.sh    whom a maintainer's revocation is held to
 .github/scripts/check-revocation.sh    a maintainer's revocation, judged
 .github/scripts/check-apply.sh         a change to published opam files, judged against the records

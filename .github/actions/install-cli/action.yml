@@ -8,8 +8,8 @@ runs:
     - shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
-        VERSION: "0.5.2"
-        SHA256: "5ad532f0b01bffd474a485ec360b38273260fc2f775232785539e65a3546dab5"
+        VERSION: "0.6.0"
+        SHA256: "6cc6514f3fc6b92a67a2cfd9365ecceaaf2b664433f2e643b2171928d36b90d3"
       run: |
         gh release download "$VERSION" -R open-opam/open-opam-cli -p open-opam-linux-x86_64 -D "$RUNNER_TEMP"
         echo "$SHA256  $RUNNER_TEMP/open-opam-linux-x86_64" | sha256sum -c -
