@@ -23,6 +23,8 @@ jobs:
         with:
           ref: main
       - uses: oven-sh/setup-bun@v2
+        with:
+          no-cache: true
       # Only Bun's packages: this job can push, so it builds no package.
       - run: make docs/node_modules
       - run: make --silent stats > "$RUNNER_TEMP/snapshot.json"
