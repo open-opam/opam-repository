@@ -59,6 +59,8 @@ change; echo new > docs/page; is "a page is neither a package nor a record" othe
 change; publish bar; echo new > docs/page; is "a package and a page together are refused" refused
 change; record foo.1.0.0 "$by_author"; is "an author's record is a record" record
 change; git rm -q packages/foo/foo.2.0.0/opam; is "a deletion is left to open-opam check to refuse" record
+change; echo '# Records' > .open-opam/README.md; echo new > docs/page; is "the records' README is a document" other
+change; mkdir -p .open-opam/other; echo x > .open-opam/other/x; is "an unknown folder of records waits for a maintainer" other
 
 change; record foo.1.0.0 "$by_alice"; is "a maintainer revokes" revocation pass admin
 change; record foo.1.0.0 "$by_alice"; is "nobody else revokes for the registry" revocation fail read

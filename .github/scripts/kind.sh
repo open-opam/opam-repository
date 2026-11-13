@@ -14,8 +14,9 @@ head=$2
 changes() { git diff --name-status --no-renames "$base...$head" | tr '\t' ' '; }
 added() { git diff --name-only --diff-filter=A "$base...$head" -- "$1"; }
 
-# Git quotes a path with unusual bytes, so the quote is allowed for.
-data=$(changes | grep -cE '^[A-Z] "?(packages|\.open-opam)/' || true)
+# Git quotes a path with unusual bytes, so the quote is allowed for. The records'
+# README is a document, which a maintainer merges like any.
+data=$(changes | grep -cE '^[A-Z] "?(packages|\.open-opam/(owners|revocations|restorations|blocked))/' || true)
 if [ "$data" -eq 0 ]; then
   echo other
   exit 0
