@@ -35,7 +35,24 @@ reads and checks them.
 
 `reason` is `author-request` when the version's author revoked it, and then the
 actor is its repository and the evidence its release; the maintainer's are
-`security`, `legal` and `upstream-gone`.
+`security`, `legal`, `gone` and `malicious`.
+
+## Blocks
+
+`blocked/<account id>.json` blocks the GitHub account with that numeric ID: no
+repository it owns publishes here. A maintainer's revocation for `malicious`
+adds it beside the revocation.
+
+```json
+{
+  "account": "login",
+  "actor": "maintainer",
+  "evidence": "https://github.com/advisories/GHSA-xxxx",
+  "blocked_at": "2026-11-13T00:00:00Z"
+}
+```
+
+`account` is a display name, the account's login when it was blocked.
 
 ## Restorations
 
