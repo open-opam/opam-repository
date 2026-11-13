@@ -109,4 +109,5 @@ GitHub counts each release asset since it was uploaded.
   Why: package code never shares a job with a token that can publish, and a
   cache is something a job running package code could have written. Symptom:
   `pages: write` or `id-token: write` on the job that runs `make setup`, or a
-  cache action in `docs.yml` or `stats.yml`.
+  cache in `docs.yml` or `stats.yml`, a setup action's own among them, such
+  as `setup-bun` without `no-cache: true`.
