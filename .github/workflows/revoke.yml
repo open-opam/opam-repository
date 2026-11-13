@@ -1,5 +1,6 @@
-# The maintainer's revocation, for security, a legal reason or a gone release; an
-# author revokes their own with open-opam revoke. It is the one workflow a person
+# The maintainer's revocation, for security, a legal reason, a gone release or a
+# malicious package, which also blocks its author; an author revokes their own
+# with open-opam revoke. It is the one workflow a person
 # starts, since the decision is a person's: only someone who can write to this
 # repository can start it, and the record says who it was. The registry's App
 # opens the pull request, so it is checked and merged like any, and apply makes
@@ -17,10 +18,10 @@ on:
         description: The version, or empty for every version
         required: false
       reason:
-        description: Why
+        description: Why. Malicious, for malware or spam, also blocks its author
         required: true
         type: choice
-        options: [security, legal, upstream-gone]
+        options: [security, legal, gone, malicious]
       evidence:
         description: What shows why, a link where there is one
         required: true
@@ -49,6 +50,8 @@ jobs:
           ref: main
           token: ${{ steps.app.outputs.token }}
       - name: Add a record for each version
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
         run: .github/scripts/revoke.sh "$NAME" "$VERSION" "$REASON" "$EVIDENCE" "$ACTOR"
       - name: Open the pull request
         env:
@@ -59,7 +62,7 @@ jobs:
           git config user.name "$APP[bot]"
           git config user.email "$APP[bot]@users.noreply.github.com"
           git switch -c "$branch"
-          git add .open-opam/revocations
+          git add .open-opam
           git commit -qm "Revoke $NAME $VERSION" -m "Reason: $REASON. Evidence: $EVIDENCE"
           git push -q origin "$branch"
           gh pr create -R "$REPO" --base main --head "$branch" --title "Revoke $NAME $VERSION" --body "Reason: $REASON. Evidence: $EVIDENCE. Actor: $ACTOR."

@@ -1,6 +1,7 @@
 #!/bin/sh
 # Writes a maintainer's revocation record for one version of a package, or for
-# every version that has none when the version is empty.
+# every version that has none when the version is empty. A malicious one also
+# blocks the account that owns the package's repository.
 set -eu
 
 name=$1
@@ -31,6 +32,19 @@ for dir in "packages/$name/$name".${version:-*}; do
     '{reason: $reason, actor: $actor, evidence: $evidence, revoked_at: $at}' > "$record"
   added=$((added + 1))
 done
+
+# A version revoked before, for another reason, still blocks its author.
+if [ "$reason" = malicious ]; then
+  set -- $("$(dirname "$0")/owner-account.sh" "$name")
+  block=".open-opam/blocked/$1.json"
+  if [ ! -f "$block" ]; then
+    mkdir -p .open-opam/blocked
+    jq -cn --arg account "$2" --arg actor "$actor" --arg evidence "$evidence" --arg at "$now" \
+      '{account: $account, actor: $actor, evidence: $evidence, blocked_at: $at}' > "$block"
+    added=$((added + 1))
+  fi
+fi
+
 if [ "$added" -eq 0 ]; then
   echo "$name ${version:-in every version} is already revoked."
   exit 1

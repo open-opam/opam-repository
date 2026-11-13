@@ -14,7 +14,7 @@ if [ "$author" != "$app" ]; then
   echo "$author"
   exit 0
 fi
-record=$(git diff --name-only --diff-filter=A "$base...$head" -- '.open-opam/revocations/*.json' | head -n 1)
+record=$(git diff --name-only --diff-filter=A "$base...$head" -- '.open-opam/revocations/*.json' '.open-opam/blocked/*.json' | head -n 1)
 actor=$(git show "$head:$record" | jq -r '.actor | strings')
 case "$actor" in
   *[!A-Za-z0-9-]* | '')
