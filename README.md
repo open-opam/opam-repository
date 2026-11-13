@@ -2,7 +2,7 @@
 
 Self-service opam repository. Open OCaml publishing for humans and agents.
 
-**Catalogue**: [open-opam.github.io/opam-repository](https://open-opam.github.io/opam-repository/)
+**Catalogue**: [open-opam.org](https://open-opam.org/)
 
 ## Install
 
@@ -22,4 +22,4 @@ open-opam release 1.2.3
 open-opam publish 1.2.3
 ```
 
-The registry checks each release and merges it if it passes. No person reviews a package. [How publishing works](https://open-opam.github.io/opam-repository/publish/)
+The registry checks each release and merges it if it passes. No person reviews a package. [How publishing works](https://open-opam.org/publish/)

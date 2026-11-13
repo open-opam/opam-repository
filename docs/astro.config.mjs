@@ -18,8 +18,8 @@ const repository = fileURLToPath(new URL("..", import.meta.url));
 const docs = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
-  site: "https://open-opam.github.io",
-  base: "/opam-repository",
+  site: "https://open-opam.org",
+  base: "/",
   trailingSlash: "always",
   outDir: `${repository}_build/docs`,
   integrations: [solid()],
