@@ -20,9 +20,10 @@ publishing.
 
 ## What a person decides
 
-Only what no check can: revoking a version for a security or legal reason, or
-because its release is gone, and settling a [dispute](DISPUTES.md). Each
-revocation adds a public record of who made it, why, and the evidence.
+Only what no check can: revoking a version for a security or legal reason,
+because its release is gone, or because it is malicious, which also blocks its
+author. And settling a [dispute](DISPUTES.md). Each revocation adds a public
+record of who made it, why, and the evidence.
 
 ## Changes to the registry
 

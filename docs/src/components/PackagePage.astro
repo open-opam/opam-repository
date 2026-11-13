@@ -96,7 +96,7 @@ const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state
     </div>
   </div>
 
-  {(v.state.kind === "revoked" || !isLatest || pkg.owner?.status === "disputed") && (
+  {(v.state.kind === "revoked" || !isLatest) && (
     <div class="notices">
       {v.state.kind === "revoked" && (
         <div class="alert alert--danger" role="alert">
@@ -113,14 +113,6 @@ const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state
         <div class="alert alert--accent">
           <div class="alert__content">
             <div class="notice-line"><CircleInfo width={18} height={18} aria-hidden="true" />A newer version is out: <a class="link" href={href(pkg.name)}>{pkg.name} {pkg.latest.version}</a></div>
-          </div>
-        </div>
-      )}
-      {pkg.owner?.status === "disputed" && (
-        <div class="alert alert--warning">
-          <div class="alert__content">
-            <div class="alert__title">This name is disputed.</div>
-            <div class="alert__description">No new version of it can be published until the dispute is decided.</div>
           </div>
         </div>
       )}
