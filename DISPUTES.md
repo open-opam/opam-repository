@@ -17,9 +17,8 @@ metadata, prior publication, and trademark.
 - No action.
 - Revoke the versions concerned, with a public record.
 
-A name that appears in official opam from another repository, after it was first
-published here, is settled by a dispute like any other; official opam's review is
-strong evidence.
+A name never moves to another repository. If official opam later names another
+repository for it, no new version of it publishes here.
 
 ## Timing
 

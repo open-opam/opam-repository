@@ -13,11 +13,11 @@ registry, and any package published here.
 ## Response
 
 The targets are acknowledgement within one business day, and a revocation
-decision within one business day for active malware.
+decision within one business day for active malware. Revoking a malicious
+package also blocks its author from publishing here.
 
-A revoked version stays listed, and opam refuses to install it. No registry can
-uninstall from a switch, so anyone who already installed it keeps it until they
-remove it; the record and the advisory say so.
+A revoked version stays listed, and opam refuses to install it. Anyone who
+already installed it keeps it until they remove it.
 
 ## Safe harbour
 

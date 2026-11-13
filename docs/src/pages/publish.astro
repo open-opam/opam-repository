@@ -70,7 +70,8 @@ const commands: { name: string; usage: string; what: string; options: [string, s
       <p>
         <a href={`${base}/packages/open-opam/`}>open-opam</a>'s <code>init</code> prepares your repository once.
         <code>check</code> tells you before tagging whether a version would pass. <code>release</code> tags the
-        commit and makes its immutable release. <code>publish</code> sends the release to the registry.
+        commit and makes its immutable release. <code>publish</code> sends the release to the registry, which merges
+        it once its checks pass. <code>status</code> shows where it stands.
       </p>
       <p class="side-note">
         To let official opam's file win where both repositories hold the same package version, add the registry last,
