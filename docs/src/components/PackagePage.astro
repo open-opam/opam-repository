@@ -83,7 +83,11 @@ const dependencyRows = (list: { name: string; constraint?: string; alternative: 
 const versions = pkg.versions.map((o) => ({ version: o.version, revoked: o.state.kind === "revoked", href: href(pkg.name, o.version) }));
 ---
 
-<Base title={`${v.name} ${v.version} · open-opam`} description={v.synopsis ?? `${v.name} on open-opam`}>
+<Base
+  title={v.synopsis ? `${v.name} ${v.version} · ${v.synopsis} · open-opam` : `${v.name} ${v.version} · open-opam`}
+  description={v.synopsis ?? `${v.name} on open-opam`}
+  canonical={isLatest ? href(pkg.name) : undefined}
+>
   <div class="crumb"><Trail.make steps={trail} /></div>
 
   <div class="package-head">

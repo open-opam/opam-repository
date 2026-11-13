@@ -12,6 +12,6 @@ const { document } = Astro.props as { document: Document };
 const html = await render(document);
 ---
 
-<Base title={`${document.title} · open-opam`} description={`The open-opam registry's ${document.title.toLowerCase()}.`}>
+<Base title={`${document.title} · open-opam`} description={document.summary}>
   <article class="card card--default readme document" set:html={html} />
 </Base>
