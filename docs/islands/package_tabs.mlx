@@ -27,25 +27,25 @@ let%component make ~(tabs : tab array) ~(readme : Jsx.element)
         | 0 -> ""
         | n -> String.sub hash 1 (n - 1)
       in
-      if Array.exists (fun (t : tab) -> String.equal t.id wanted) (tabs ())
+      if Array.exists (fun (t : tab) -> String.equal t.id wanted) (S.get tabs)
       then S.set set_selected wanted);
   <Tabs
-    selected_key=(fun () -> S.get selected)
+    selected_key=(S.get selected)
     on_selection_change=(fun id ->
                           S.set set_selected id;
                           replace_state Js.null "" ("#" ^ id))>
     <Tabs.List_container>
       <Tabs.List aria_label="About this package">
-        <Solidtype.For each=(fun () -> tabs ())>
+        <Solidtype.For each=(S.get tabs)>
           (fun (t : tab) _ ->
-            <Tabs.Tab id=(fun () -> t.id)>
-              (fun () -> Jsx.string t.label) <Tabs.Indicator />
+            <Tabs.Tab id=t.id>
+              (Jsx.string t.label) <Tabs.Indicator />
             </Tabs.Tab>)
         </Solidtype.For>
       </Tabs.List>
     </Tabs.List_container>
-    <Tabs.Panel class_="pt-5" id="readme">(fun () -> Jsx.element (readme ()))</Tabs.Panel>
-    <Tabs.Panel class_="pt-5" id="versions">(fun () -> Jsx.element (versions ()))</Tabs.Panel>
-    <Tabs.Panel class_="pt-5" id="dependencies">(fun () -> Jsx.element (dependencies ()))</Tabs.Panel>
-    <Tabs.Panel class_="pt-5" id="dependents">(fun () -> Jsx.element (dependents ()))</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="readme">(S.get readme)</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="versions">(S.get versions)</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="dependencies">(S.get dependencies)</Tabs.Panel>
+    <Tabs.Panel class_="pt-5" id="dependents">(S.get dependents)</Tabs.Panel>
   </Tabs>

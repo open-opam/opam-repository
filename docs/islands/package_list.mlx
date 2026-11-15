@@ -62,7 +62,7 @@ let%component make ~(packages : package array) () =
   let order, set_order = S.create_signal By_name in
   let page, set_page = S.create_signal 1 in
   let sorted () =
-    let all = Array.copy (packages ()) in
+    let all = Array.copy (S.get packages) in
     Array.stable_sort (compare_by (S.get order)) all;
     all
   in
@@ -97,21 +97,21 @@ let%component make ~(packages : package array) () =
             <Table.Column>"Downloads"</Table.Column>
           </Table.Header>
           <Table.Body>
-            <Solidtype.For each=(fun () -> shown ())>
+            <Solidtype.For each=(shown ())>
               (fun (p : package) _ ->
                 <Table.Row>
                   <Table.Cell>
-                    <a class_="package-list-name" href=(fun () -> p.href)>(fun () -> Jsx.string p.name)</a>
+                    <a class_="package-list-name" href=p.href>(Jsx.string p.name)</a>
                   </Table.Cell>
                   <Table.Cell>
-                    <Chip size=`sm variant=`secondary>(fun () -> Jsx.string p.version)</Chip>
+                    <Chip size=`sm variant=`secondary>(Jsx.string p.version)</Chip>
                   </Table.Cell>
-                  <Table.Cell><span class_="package-list-synopsis">(fun () -> Jsx.string p.synopsis)</span></Table.Cell>
-                  <Table.Cell><span class_="whitespace-nowrap">(fun () -> Jsx.string p.published_label)</span></Table.Cell>
+                  <Table.Cell><span class_="package-list-synopsis">(Jsx.string p.synopsis)</span></Table.Cell>
+                  <Table.Cell><span class_="whitespace-nowrap">(Jsx.string p.published_label)</span></Table.Cell>
                   <Table.Cell>
                     <span class_="package-list-downloads">
                       <Gravity.Arrow_down_to_line aria_hidden=true />
-                      (fun () -> Jsx.int p.downloads)
+                      (Jsx.int p.downloads)
                     </span>
                   </Table.Cell>
                 </Table.Row>)
@@ -122,40 +122,37 @@ let%component make ~(packages : package array) () =
     </Table>
     <Pagination class_="package-list-pages">
       <Pagination.Summary>
-        (fun () ->
-          let total = Array.length (sorted ()) in
-          let first = if total = 0 then 0 else ((S.get page - 1) * page_size) + 1 in
-          let last = Int.min (S.get page * page_size) total in
-          Jsx.string
-            (string_of_int first ^ "-" ^ string_of_int last ^ " of "
-           ^ string_of_int total ^ " packages"))
+        (let total = Array.length (sorted ()) in
+         let first = if total = 0 then 0 else ((S.get page - 1) * page_size) + 1 in
+         let last = Int.min (S.get page * page_size) total in
+         Jsx.string
+           (string_of_int first ^ "-" ^ string_of_int last ^ " of "
+          ^ string_of_int total ^ " packages"))
       </Pagination.Summary>
       <Pagination.Content>
         <Pagination.Item>
           <Pagination.Previous
-            is_disabled=(fun () -> S.get page = 1)
+            is_disabled=(S.get page = 1)
             on_press=(fun () -> S.update set_page pred)>
             <Pagination.Previous_icon />
           </Pagination.Previous>
         </Pagination.Item>
-        <Index each=(fun () -> Array.of_list (page_numbers ~page:(S.get page) ~pages:(pages ())))>
+        <Index each=(Array.of_list (page_numbers ~page:(S.get page) ~pages:(pages ())))>
           (fun shown _ ->
             <Pagination.Item>
-              (fun () ->
-                match S.get shown with
-                | Ellipsis -> Jsx.element <Pagination.Ellipsis />
-                | Page p ->
-                    Jsx.element
-                      <Pagination.Link
-                        is_active=(fun () -> p = S.get page)
-                        on_press=(fun () -> S.set set_page p)>
-                        (fun () -> Jsx.int p)
-                      </Pagination.Link>)
+              (match S.get shown with
+               | Ellipsis -> <Pagination.Ellipsis />
+               | Page p ->
+                   <Pagination.Link
+                     is_active=(p = S.get page)
+                     on_press=(fun () -> S.set set_page p)>
+                     (Jsx.int p)
+                   </Pagination.Link>)
             </Pagination.Item>)
         </Index>
         <Pagination.Item>
           <Pagination.Next
-            is_disabled=(fun () -> S.get page >= pages ())
+            is_disabled=(S.get page >= pages ())
             on_press=(fun () -> S.update set_page succ)>
             <Pagination.Next_icon />
           </Pagination.Next>

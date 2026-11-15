@@ -11,3 +11,31 @@
   (merlin_reader mlx)
   (preprocess
    (run mlx-pp %{input-file}))))
+
+(generate_opam_files true)
+
+; The islands' dependencies. solidtype is taken up to its next breaking
+; release; catalogue.opam.locked holds the exact solution `make setup`
+; installs.
+
+(package
+ (name catalogue)
+ (synopsis "The open-opam catalogue's islands")
+ (allow_empty)
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))
+  (mlx
+   (>= 0.11))
+  (solidtype
+   (and (>= 0.11.0) (< 0.12.0)))
+  (ppx_solidtype
+   (and (>= 0.11.0) (< 0.12.0)))
+  (solidtype-kobalte
+   (and (>= 0.11.0) (< 0.12.0)))
+  (solidtype-heroui
+   (and (>= 0.11.0) (< 0.12.0)))
+  (solidtype-gravity-icons
+   (and (>= 0.11.0) (< 0.12.0)))))

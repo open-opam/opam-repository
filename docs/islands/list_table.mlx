@@ -2,6 +2,7 @@
    HeroUI's table. It is rendered when the site is built and runs nothing in
    the browser: the page uses it with no directive. *)
 
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Chip = Solidtype_heroui.Chip
 module Table = Solidtype_heroui.Table
@@ -18,35 +19,35 @@ type row = { cells : cell array }
 
 let content (c : cell) =
   let text =
-    if c.code then <code>(fun () -> Jsx.string c.text)</code>
-    else <span>(fun () -> Jsx.string c.text)</span>
+    if c.code then <code>(Jsx.string c.text)</code>
+    else <span>(Jsx.string c.text)</span>
   in
   match Js.Nullable.toOption c.href with
-  | Some href -> <a href>(fun () -> Jsx.element text)</a>
+  | Some href -> <a href>text</a>
   | None -> text
 
 let%component make ~(label : string) ~(columns : string array) ~(rows : row array) () =
   <Table>
     <Table.Scroll_container>
-      <Table.Content aria_label=(fun () -> label ())>
+      <Table.Content aria_label=(S.get label)>
         <Table.Header>
-          <Solidtype.For each=(fun () -> columns ())>
+          <Solidtype.For each=(S.get columns)>
             (fun column _ ->
-              <Table.Column>(fun () -> Jsx.string column)</Table.Column>)
+              <Table.Column>(Jsx.string column)</Table.Column>)
           </Solidtype.For>
         </Table.Header>
         <Table.Body>
-          <Solidtype.For each=(fun () -> rows ())>
+          <Solidtype.For each=(S.get rows)>
             (fun (r : row) _ ->
               <Table.Row>
-                <Solidtype.For each=(fun () -> r.cells)>
+                <Solidtype.For each=r.cells>
                   (fun (c : cell) _ ->
                     <Table.Cell>
                       <span class_="inline-flex flex-wrap items-center gap-2">
-                        (fun () -> Jsx.element (content c))
-                        <Solidtype.Show when_=(fun () -> Js.Nullable.isNullable c.chip |> not)>
-                          <Chip size=`sm color=(fun () -> if c.danger then `danger else `default)>
-                            (fun () -> Jsx.string (Option.value ~default:"" (Js.Nullable.toOption c.chip)))
+                        (content c)
+                        <Solidtype.Show when_=(not (Js.Nullable.isNullable c.chip))>
+                          <Chip size=`sm color=(if c.danger then `danger else `default)>
+                            (Jsx.string (Option.value ~default:"" (Js.Nullable.toOption c.chip)))
                           </Chip>
                         </Solidtype.Show>
                       </span>

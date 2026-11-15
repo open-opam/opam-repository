@@ -2,6 +2,7 @@
    package, the version. Rendered when the site is built; the page uses it
    with no directive, so it runs nothing in the browser. *)
 
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Breadcrumbs = Solidtype_heroui.Breadcrumbs
 
@@ -9,11 +10,11 @@ type step = { label : string; href : string Js.Nullable.t  (** none: the page it
 
 let%component make ~(steps : step array) () =
   <Breadcrumbs>
-    <Solidtype.For each=(fun () -> steps ())>
+    <Solidtype.For each=(S.get steps)>
       (fun (s : step) _ ->
         match Js.Nullable.toOption s.href with
         | Some href ->
-            <Breadcrumbs.Item href=(fun () -> href)>(fun () -> Jsx.string s.label)</Breadcrumbs.Item>
-        | None -> <Breadcrumbs.Item>(fun () -> Jsx.string s.label)</Breadcrumbs.Item>)
+            <Breadcrumbs.Item href>(Jsx.string s.label)</Breadcrumbs.Item>
+        | None -> <Breadcrumbs.Item>(Jsx.string s.label)</Breadcrumbs.Item>)
     </Solidtype.For>
   </Breadcrumbs>
