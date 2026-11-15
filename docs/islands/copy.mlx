@@ -25,20 +25,18 @@ let%component make ~(code : string) ~(label : string) () =
             Js.Global.setTimeout ~f:(fun () -> S.set set_copied false) said_ms
           in
           Js.Promise.resolve ())
-        (write_text (code ()))
+        (write_text (S.get code))
     in
     ()
   in
   <div class_="copy">
-    <code>(fun () -> Jsx.string (code ()))</code>
+    <code>(Jsx.string (S.get code))</code>
     <Button
       size=`sm
       variant=`ghost
       is_icon_only=true
-      class_=(fun () ->
-               if S.get copied then "copy-button copied" else "copy-button")
-      aria_label=(fun () ->
-                   (if S.get copied then "Copied " else "Copy ") ^ label ())
+      class_=(if S.get copied then "copy-button copied" else "copy-button")
+      aria_label=((if S.get copied then "Copied " else "Copy ") ^ S.get label)
       on_click=copy>
       <Gravity.Copy class_="copy-icon" aria_hidden=true />
       <Gravity.Check class_="check-icon" aria_hidden=true />

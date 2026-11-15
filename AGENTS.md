@@ -29,6 +29,7 @@ packages/<name>/<name>.<version>/opam  one published version of a package
 .github/workflows/stats                each archive's downloads, once a day, onto the stats branch
 docs/                                  the catalogue: Astro, reading packages/, .open-opam/, the registry's documents, GitHub releases and the stats branch
 docs/islands/                          its interactive parts: OCaml with solidtype and HeroUI, compiled by Melange
+docs/dune-project                      the islands' dependencies, as ranges; catalogue.opam.locked is the solution make setup installs, make lock rewrites it
 docs/stats.ts                          one day's download snapshot, as stats.yml saves it
 stats/<date>.json                      on the stats branch only: that day's totals, by archive address
 Makefile                               make setup, then make docs builds the catalogue into _build/docs; make test tests the scripts; make stats prints a snapshot

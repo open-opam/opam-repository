@@ -64,7 +64,7 @@ let matches (p : package) typed =
 
 let%component make ~(packages : package array) ~(base : string) () =
   let by_name name =
-    Array.find_opt (fun (p : package) -> String.equal p.name name) (packages ())
+    Array.find_opt (fun (p : package) -> String.equal p.name name) (S.get packages)
   in
   let modifier, set_modifier = S.create_signal Command in
   (* HeroUI's Input keeps its ref for itself, so the input is found from the
@@ -102,23 +102,21 @@ let%component make ~(packages : package array) ~(base : string) () =
                      | None -> false)
     on_change=(fun chosen ->
                 match chosen with
-                | [| name |] -> assign (base () ^ "/packages/" ^ name ^ "/")
+                | [| name |] -> assign (S.get base ^ "/packages/" ^ name ^ "/")
                 | _ -> ())>
     <Combo_box.Input_group>
       <Input
         aria_label="Search packages"
         placeholder="Search packages"
-        aria_keyshortcuts=(fun () ->
-                            match S.get modifier with
-                            | Command -> "Meta+K"
-                            | Control -> "Control+K")
+        aria_keyshortcuts=(match S.get modifier with
+                           | Command -> "Meta+K"
+                           | Control -> "Control+K")
       />
       <span class_="search-shortcut" aria_hidden=true>
         <Kbd>
-          (fun () ->
-            match S.get modifier with
-            | Command -> Jsx.element <Kbd.Abbr key_value=`command />
-            | Control -> Jsx.element <Kbd.Content>"Ctrl"</Kbd.Content>)
+          (match S.get modifier with
+           | Command -> <Kbd.Abbr key_value=`command />
+           | Control -> <Kbd.Content>"Ctrl"</Kbd.Content>)
           <Kbd.Content>"K"</Kbd.Content>
         </Kbd>
       </span>
@@ -127,15 +125,15 @@ let%component make ~(packages : package array) ~(base : string) () =
       <List_box
         class_="max-h-[60vh] overflow-y-auto"
         render_empty_state=(fun _ -> <Empty_state>"No package matches"</Empty_state>)>
-        <Solidtype.For each=(fun () -> packages ())>
+        <Solidtype.For each=(S.get packages)>
           (fun (p : package) _ ->
-            <List_box.Item id=(fun () -> p.name) text_value=(fun () -> p.name)>
+            <List_box.Item id=p.name text_value=p.name>
               <div class_="flex min-w-0 flex-col">
                 <Label class_="flex items-center gap-2">
-                  (fun () -> Jsx.string p.name)
-                  <Chip size=`sm variant=`secondary>(fun () -> Jsx.string p.version)</Chip>
+                  (Jsx.string p.name)
+                  <Chip size=`sm variant=`secondary>(Jsx.string p.version)</Chip>
                 </Label>
-                <Description class_="truncate">(fun () -> Jsx.string p.synopsis)</Description>
+                <Description class_="truncate">(Jsx.string p.synopsis)</Description>
               </div>
             </List_box.Item>)
         </Solidtype.For>
