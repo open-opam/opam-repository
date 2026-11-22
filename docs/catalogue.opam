@@ -6,11 +6,11 @@ depends: [
   "ocaml" {>= "5.5"}
   "melange" {>= "7.0.1-55"}
   "mlx" {>= "0.11"}
-  "solidtype" {>= "0.11.0" & < "0.12.0"}
-  "ppx_solidtype" {>= "0.11.0" & < "0.12.0"}
-  "solidtype-kobalte" {>= "0.11.0" & < "0.12.0"}
-  "solidtype-heroui" {>= "0.11.0" & < "0.12.0"}
-  "solidtype-gravity-icons" {>= "0.11.0" & < "0.12.0"}
+  "solidtype" {>= "0.14.0" & < "0.15.0"}
+  "ppx_solidtype" {>= "0.14.0" & < "0.15.0"}
+  "solidtype-kobalte" {>= "0.14.0" & < "0.15.0"}
+  "solidtype-heroui" {>= "0.14.0" & < "0.15.0"}
+  "solidtype-gravity-icons" {>= "0.14.0" & < "0.15.0"}
   "odoc" {with-doc}
 ]
 build: [
