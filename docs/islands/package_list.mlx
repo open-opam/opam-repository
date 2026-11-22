@@ -120,6 +120,7 @@ let%component make ~(packages : package array) () =
         </Table.Content>
       </Table.Scroll_container>
     </Table>
+    <Solidtype.Show when_=(pages () > 1)>
     <Pagination class_="package-list-pages">
       <Pagination.Summary>
         (let total = Array.length (sorted ()) in
@@ -159,4 +160,5 @@ let%component make ~(packages : package array) () =
         </Pagination.Item>
       </Pagination.Content>
     </Pagination>
+    </Solidtype.Show>
   </div>
