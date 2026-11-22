@@ -1,0 +1,39 @@
+opam-version: "2.0"
+synopsis: "Charts for solidtype: rhp's reactive plots of HTML, typed"
+description:
+  "The charts of rhp 2.2, reactive HTML plots built on Solid, for OCaml front ends written with solidtype: generated from rhp's own declarations where a rule maps them whole, and ported by hand where none does."
+maintainer: ["Hypha Technologies Ltd <dev@hyphatech.io>"]
+authors: ["Hypha Technologies Ltd"]
+license: "MIT"
+homepage: "https://github.com/hyphatech/solidtype"
+bug-reports: "https://github.com/hyphatech/solidtype/issues"
+depends: [
+  "dune" {>= "3.18"}
+  "ocaml" {>= "5.5"}
+  "melange" {>= "7.0.1-55"}
+  "solidtype" {= version}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+dev-repo: "git+https://github.com/hyphatech/solidtype.git"
+x-maintenance-intent: ["(latest)"]
+x-npm-depends: [ "@bezda/rhp@~2.2.0" ]
+x-open-opam: true
+x-commit-hash: "7ec5a4c22564beb7d3fa364d2f9fae510673a947"
+url {
+  src: "https://github.com/hyphatech/solidtype/releases/download/0.14.0/solidtype-0.14.0.tar.gz"
+  checksum: "sha256=c44384bd962dc46f2245838835341ae4a983a0cab45ed160be183b89a03ae455"
+}
