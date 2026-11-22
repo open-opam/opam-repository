@@ -4,6 +4,7 @@
 import Base from "../layouts/Base.astro";
 import PackageCard from "../components/PackageCard.astro";
 import * as Copy from "@islands/copy.jsx";
+import * as LinkButton from "@islands/link_button.jsx";
 import Boxes from "@gravity-ui/icons/svgs/boxes-3.svg";
 import ChartLine from "@gravity-ui/icons/svgs/chart-line.svg";
 import Sparkles from "@gravity-ui/icons/svgs/sparkles.svg";
@@ -41,8 +42,8 @@ const popular = packages
       <p class="hero-lead">Open OCaml publishing for humans and agents.</p>
       <Copy.make client:visible label="the command that adds the registry" code={`opam repo add open-opam https://github.com/${repository}.git`} />
       <div class="hero-actions">
-        <a class="button button--primary" href={`${base}/packages/`}><Boxes width={16} height={16} aria-hidden="true" />Browse packages</a>
-        <a class="button button--secondary" href={`${base}/publish/`}><ArrowUpFromLine width={16} height={16} aria-hidden="true" />Publish a release</a>
+        <LinkButton.make href={`${base}/packages/`}><Boxes width={16} height={16} aria-hidden="true" />Browse packages</LinkButton.make>
+        <LinkButton.make variant="secondary" href={`${base}/publish/`}><ArrowUpFromLine width={16} height={16} aria-hidden="true" />Publish a release</LinkButton.make>
       </div>
     </div>
 

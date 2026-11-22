@@ -1,0 +1,43 @@
+(* A package in a list, as a link with a HeroUI card's look: its name, latest
+   version, synopsis, when it was last published and, where the list ranks by
+   them, its downloads. Rendered when the site is built; the page uses it with
+   no directive, so it runs nothing in the browser. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Chip = Solidtype_heroui.Chip
+module Styles = Solidtype_heroui.Styles
+module Gravity = Solidtype_gravity_icons
+
+let%component make ~(name : string) ~(version : string) ~(synopsis : string)
+    ~(href : string) ?(published : string option) ?(downloads : string option)
+    () =
+  (* A card is a <div>, and this one is a link as a whole, so the link takes
+     the card's classes. Its slots leave out a class given in its options. *)
+  let card =
+    Styles.Card.base (Styles.Card.slots (Styles.Card.options ~variant:`default ()))
+    ^ " card-link"
+  in
+  <a class_=card href=(S.get href)>
+    <span class_="package-card-head">
+      <span class_="package-icon"><Gravity.Box class_="size-4.5" aria_hidden=true /></span>
+      <strong>(Jsx.string (S.get name))</strong>
+      <Chip size=`sm variant=`secondary>(Jsx.string (S.get version))</Chip>
+    </span>
+    <Solidtype.Show when_=(not (String.equal (S.get synopsis) ""))>
+      <span class_="package-card-synopsis">(Jsx.string (S.get synopsis))</span>
+    </Solidtype.Show>
+    <span class_="package-card-meta">
+      (match S.get published with
+       | Some day ->
+           <span><Gravity.Calendar class_="size-3.25" aria_hidden=true />(Jsx.string day)</span>
+       | None -> Jsx.nothing)
+      (match S.get downloads with
+       | Some n ->
+           <span>
+             <Gravity.Arrow_down_to_line class_="size-3.25" aria_hidden=true />
+             (Jsx.string (n ^ " downloads"))
+           </span>
+       | None -> Jsx.nothing)
+    </span>
+  </a>

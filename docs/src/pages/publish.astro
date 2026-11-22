@@ -2,6 +2,7 @@
 // What each check looks at in detail is left to the code, on GitHub.
 import Base from "../layouts/Base.astro";
 import * as Copy from "@islands/copy.jsx";
+import * as Card from "@islands/card.jsx";
 import ArrowUpFromLine from "@gravity-ui/icons/svgs/arrow-up-from-line.svg";
 import Rocket from "@gravity-ui/icons/svgs/rocket.svg";
 import ListCheck from "@gravity-ui/icons/svgs/list-check.svg";
@@ -116,7 +117,7 @@ const commands: { name: string; usage: string; what: string; options: [string, s
     <section class="doc-section" id="reference">
       <h2><BookOpen width={20} height={20} aria-hidden="true" />Command reference</h2>
       {commands.map((c) => (
-        <div class="card card--default command" id={`command-${c.name}`}>
+        <Card.make class="command" id={`command-${c.name}`}>
           <h3><code>open-opam {c.name}</code></h3>
           <p>{c.what}</p>
           <pre class="usage"><code>{c.usage}</code></pre>
@@ -130,7 +131,7 @@ const commands: { name: string; usage: string; what: string; options: [string, s
               ))}
             </dl>
           )}
-        </div>
+        </Card.make>
       ))}
     </section>
     </div>

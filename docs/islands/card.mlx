@@ -1,0 +1,12 @@
+(* HeroUI's card around what a page gives it: a README, a package's side
+   panels, a document, a command. Rendered when the site is built; the page
+   uses it with no directive, so it runs nothing in the browser, though an
+   island inside it may. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Card = Solidtype_heroui.Card
+
+let%component make ?(id : string option) ?(class_ : string option)
+    ~(children : Jsx.element) () =
+  <Card ?id=(S.get id) ?class_=(S.get class_)>(S.get children)</Card>
