@@ -4,6 +4,7 @@
 // system's setting is, chosen before the page paints.
 import "../styles/site.css";
 import * as Search from "@islands/search.jsx";
+import * as LinkButton from "@islands/link_button.jsx";
 import Boxes from "@gravity-ui/icons/svgs/boxes-3.svg";
 import ArrowUpFromLine from "@gravity-ui/icons/svgs/arrow-up-from-line.svg";
 import GitHubMark from "../components/GitHubMark.astro";
@@ -61,9 +62,9 @@ const footer = [["Publish", `${base}/publish/`], ...documents.map((d) => [d.titl
           <Search.make client:idle packages={searchable} base={base} />
         </div>
         <nav class="site-nav" aria-label="Site">
-          <a class="button button--ghost button--sm" href={`${base}/packages/`}><Boxes width={16} height={16} aria-hidden="true" /><span class="nav-text">Packages</span></a>
-          <a class="button button--ghost button--sm" href={`${base}/publish/`}><ArrowUpFromLine width={16} height={16} aria-hidden="true" /><span class="nav-text">Publish</span></a>
-          <a class="button button--ghost button--sm button--icon-only" href={github} aria-label="open-opam on GitHub"><GitHubMark /></a>
+          <LinkButton.make variant="ghost" size="sm" href={`${base}/packages/`}><Boxes width={16} height={16} aria-hidden="true" /><span class="nav-text">Packages</span></LinkButton.make>
+          <LinkButton.make variant="ghost" size="sm" href={`${base}/publish/`}><ArrowUpFromLine width={16} height={16} aria-hidden="true" /><span class="nav-text">Publish</span></LinkButton.make>
+          <LinkButton.make variant="ghost" size="sm" isIconOnly href={github} aria-label="open-opam on GitHub"><GitHubMark /></LinkButton.make>
         </nav>
       </div>
     </header>

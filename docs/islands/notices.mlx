@@ -1,0 +1,52 @@
+(* What a version's page says before anything else, as HeroUI's alerts: that
+   the version is revoked, and that a newer one is out. Rendered when the site
+   is built; the page uses it with no directive, so it runs nothing in the
+   browser. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Alert = Solidtype_heroui.Alert
+module Link = Solidtype_heroui.Link
+
+type revocation = {
+  reason : string;
+  actor : string;
+  revoked : string;  (** the date as the page writes it *)
+  evidence : string Js.Nullable.t;  (** an address already found safe *)
+}
+
+type newer = { label : string; href : string }
+
+let%component make ?(revocation : revocation option) ?(newer : newer option) ()
+    =
+  <div class_="notices">
+    (match S.get revocation with
+     | Some r ->
+         <Alert status=`danger role=`alert>
+           <Alert.Indicator />
+           <Alert.Content>
+             <Alert.Title>"Revoked: opam will not install this version."</Alert.Title>
+             <Alert.Description>
+               (Jsx.string
+                  ("Reason: " ^ r.reason ^ ", by " ^ r.actor ^ " on " ^ r.revoked
+                 ^ "."))
+               (match Js.Nullable.toOption r.evidence with
+                | Some href ->
+                    <span>" " <Link href>"Evidence"</Link> "."</span>
+                | None -> Jsx.nothing)
+             </Alert.Description>
+           </Alert.Content>
+         </Alert>
+     | None -> Jsx.nothing)
+    (match S.get newer with
+     | Some n ->
+         <Alert status=`accent>
+           <Alert.Indicator />
+           <Alert.Content>
+             <Alert.Title>
+               "A newer version is out: " <Link href=n.href>(Jsx.string n.label)</Link>
+             </Alert.Title>
+           </Alert.Content>
+         </Alert>
+     | None -> Jsx.nothing)
+  </div>

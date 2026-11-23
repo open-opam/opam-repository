@@ -1,9 +1,7 @@
 ---
-// A package in a list, as a HeroUI card: its name, latest version, synopsis,
-// and when it was last published.
-import Box from "@gravity-ui/icons/svgs/box.svg";
-import Calendar from "@gravity-ui/icons/svgs/calendar.svg";
-import ArrowDownToLine from "@gravity-ui/icons/svgs/arrow-down-to-line.svg";
+// A package in a list: its date and downloads written as the page writes
+// them, for the island that draws its card.
+import * as Card from "@islands/package_card.jsx";
 import type { Package as Pkg } from "../lib/registry";
 
 interface Props {
@@ -17,15 +15,11 @@ const day = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 ---
 
-<a class="card card--default card-link" href={`${base}/packages/${pkg.name}/`}>
-  <span class="package-card-head">
-    <span class="package-icon"><Box width={18} height={18} aria-hidden="true" /></span>
-    <strong>{pkg.name}</strong>
-    <span class="chip chip--sm chip--secondary"><span class="chip__label">{pkg.latest.version}</span></span>
-  </span>
-  {pkg.latest.synopsis && <span class="package-card-synopsis">{pkg.latest.synopsis}</span>}
-  <span class="package-card-meta">
-    {pkg.latest.published && <span><Calendar width={13} height={13} aria-hidden="true" />{day(pkg.latest.published)}</span>}
-    {downloads !== undefined && <span><ArrowDownToLine width={13} height={13} aria-hidden="true" />{downloads.toLocaleString("en-GB")} downloads</span>}
-  </span>
-</a>
+<Card.make
+  name={pkg.name}
+  version={pkg.latest.version}
+  synopsis={pkg.latest.synopsis ?? ""}
+  href={`${base}/packages/${pkg.name}/`}
+  published={pkg.latest.published ? day(pkg.latest.published) : undefined}
+  downloads={downloads !== undefined ? downloads.toLocaleString("en-GB") : undefined}
+/>

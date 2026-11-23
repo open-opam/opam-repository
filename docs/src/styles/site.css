@@ -124,8 +124,6 @@ html, body { overflow-x: clip; }
 .package-title { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.5rem; }
 .package-title h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.01em; margin: 0; }
 .package-head .synopsis { color: var(--muted); margin: 0; max-width: 46rem; font-size: 1.05rem; }
-.notice-line { color: var(--foreground); }
-.notice-line .link { margin-left: 0.25rem; }
 .notices { display: grid; gap: 0.75rem; margin-top: 1.25rem; }
 .package-body { margin-top: 1.5rem; display: grid; grid-template-columns: minmax(0, 1fr) 21rem; gap: 1.5rem; align-items: start; }
 @media (max-width: 60rem) { .package-body { grid-template-columns: minmax(0, 1fr); } }
@@ -213,8 +211,6 @@ html, body { overflow-x: clip; }
   box-shadow: none;
   background: var(--default);
 }
-.notice-line { display: inline-flex; align-items: center; gap: 0.5rem; }
-.notice-line svg { color: var(--accent); flex: none; }
 
 .package-card-meta > span { display: inline-flex; align-items: center; gap: 0.35rem; }
 

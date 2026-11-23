@@ -1,0 +1,10 @@
+(* HeroUI's link, for one a page writes in its own text. Rendered when the
+   site is built; the page uses it with no directive, so it runs nothing in the
+   browser. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Link = Solidtype_heroui.Link
+
+let%component make ~(href : string) ~(children : Jsx.element) () =
+  <Link href=(S.get href)>(S.get children)</Link>

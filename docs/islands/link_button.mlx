@@ -1,0 +1,23 @@
+(* A link with a HeroUI button's look, for what goes to another page: the
+   header's navigation and the home page's actions. Its content, an icon and a
+   name, is the page's. Rendered when the site is built; the page uses it with
+   no directive, so it runs nothing in the browser. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Styles = Solidtype_heroui.Styles
+
+let%component make ~(href : string)
+    ?(variant : [ `primary | `secondary | `ghost ] = `primary)
+    ?(size : [ `sm | `md ] = `md) ?(is_icon_only : bool = false)
+    ?(aria_label : string option) ~(children : Jsx.element) () =
+  let classes =
+    Styles.Button.classes
+      (Styles.Button.options
+         ~variant:(S.get variant :> [ `primary | `secondary | `tertiary | `outline | `ghost | `danger | `danger_soft ])
+         ~size:(S.get size :> [ `sm | `md | `lg ])
+         ~is_icon_only:(S.get is_icon_only) ())
+  in
+  <a class_=classes href=(S.get href) ?aria_label=(S.get aria_label)>
+    (S.get children)
+  </a>
