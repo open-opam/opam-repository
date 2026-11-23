@@ -82,7 +82,6 @@ const dependencyRows = (list: { name: string; constraint?: string; alternative: 
   list.map((d) => ({
     cells: [cell(d.name, { href: href(d.name), ...(d.alternative ? { chip: "or another" } : {}) }), cell(d.constraint ?? "", { code: true })],
   }));
-// What the page says first: that this version is revoked, that a newer one is out.
 const revocation = v.state.kind === "revoked"
   ? {
       reason: v.state.revocation.reason,

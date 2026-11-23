@@ -256,7 +256,8 @@ html, body { overflow-x: clip; }
 @media (max-width: 40rem) {
   .package-list thead { display: none; }
   .package-list table, .package-list tbody, .package-list td { display: block; }
-  .package-list tbody { background: var(--surface); border-radius: calc(var(--radius) * 4); }
+  .package-list .table-root { padding-top: 0.25rem; }
+  .package-list tbody { background: var(--surface); border-radius: calc(min(32px, calc(var(--radius) * 2.5)) - 0.25rem); }
   .package-list tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.3rem 1rem; align-items: center; padding: 0.75rem 1rem; }
   .package-list tr + tr { border-top: 1px solid var(--separator); }
   .package-list td { padding: 0; border: 0; border-radius: 0; background: none; }
