@@ -19,7 +19,7 @@ type package = {
   synopsis : string;
   published : string;  (** [YYYY-MM-DD], which sorts as the date does *)
   published_label : string;  (** the date as the page writes it *)
-  downloads : int;  (** its latest archive's, or 0 before any snapshot *)
+  downloads : int;  (** every version's together, or 0 before any snapshot *)
   href : string;
 }
 
