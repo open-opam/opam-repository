@@ -27,15 +27,15 @@ depends: [
   "ocaml-compiler-libs" {= "v0.17.0"}
   "ocaml-options-vanilla" {= "1"}
   "ppx_derivers" {= "1.2.1"}
-  "ppx_solidtype" {= "0.14.0"}
+  "ppx_solidtype" {= "0.15.1"}
   "ppxlib" {= "0.39.0"}
   "sexplib0" {= "v0.17.0"}
-  "solidtype" {= "0.14.0"}
-  "solidtype-gravity-icons" {= "0.14.0"}
-  "solidtype-headless" {= "0.14.0"}
-  "solidtype-heroui" {= "0.14.0"}
-  "solidtype-internationalized-date" {= "0.14.0"}
-  "solidtype-kobalte" {= "0.14.0"}
+  "solidtype" {= "0.15.1"}
+  "solidtype-gravity-icons" {= "0.15.1"}
+  "solidtype-headless" {= "0.15.1"}
+  "solidtype-heroui" {= "0.15.1"}
+  "solidtype-internationalized-date" {= "0.15.1"}
+  "solidtype-kobalte" {= "0.15.1"}
 ]
 build: [
   ["dune" "subst"] {dev}
