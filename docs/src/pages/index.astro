@@ -10,7 +10,7 @@ import ChartLine from "@gravity-ui/icons/svgs/chart-line.svg";
 import Sparkles from "@gravity-ui/icons/svgs/sparkles.svg";
 import ArrowUpFromLine from "@gravity-ui/icons/svgs/arrow-up-from-line.svg";
 import Check from "@gravity-ui/icons/svgs/check.svg";
-import { packages, repository, type Package } from "../lib/registry";
+import { packageDownloads, packages, repository, type Package } from "../lib/registry";
 import { gates } from "../lib/gates";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -19,17 +19,17 @@ const recent = packages
   .filter((p) => p.latest.published && p.latest.state.kind === "published")
   .sort((a, b) => (b.latest.published ?? "").localeCompare(a.latest.published ?? "") || a.name.localeCompare(b.name))
   .slice(0, 6);
-// A package's last thirty days are its latest archive's, which its release's
-// other packages share; the package the archive is named after stands for it.
+// A package's downloads are every version's; a release's packages share its
+// archives, so the package the latest archive is named after stands for them.
 const named = (p: Package) => (p.latest.archive?.file.startsWith(`${p.name}-`) ? 1 : 0);
-const lastThirty = (p: Package) => (p.latest.archive?.downloads?.days ?? []).reduce((n, d) => n + d.downloads, 0);
-const allTime = (p: Package) => p.latest.archive?.downloads?.total ?? 0;
+const lastThirty = (p: Package) => packageDownloads(p)?.lastThirty ?? 0;
+const allTime = (p: Package) => packageDownloads(p)?.total ?? 0;
 // Daily figures need two snapshots a day apart; until then, the totals rank.
-const daily = packages.some((p) => (p.latest.archive?.downloads?.days.length ?? 0) > 0);
+const daily = packages.some((p) => packageDownloads(p)?.daily);
 const measure = daily ? lastThirty : allTime;
 const seen = new Set<string>();
 const popular = packages
-  .filter((p) => p.latest.archive?.downloads !== undefined)
+  .filter((p) => packageDownloads(p) !== undefined)
   .sort((a, b) => measure(b) - measure(a) || named(b) - named(a))
   .filter((p) => (p.latest.archive && !seen.has(p.latest.archive.url) ? (seen.add(p.latest.archive.url), true) : false))
   .slice(0, 6);

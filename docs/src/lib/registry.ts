@@ -18,8 +18,8 @@ const root = resolve(process.cwd(), "..");
 // The branch stats.yml writes, as the checkout knows it: fetched from GitHub,
 // or taken here with `make stats` onto a local branch of the same name.
 const statsRefs = process.env.STATS_REF ? [process.env.STATS_REF] : ["origin/stats", "stats"];
-// How far back a package's chart reaches, counted from the newest snapshot.
-const chartDays = 30;
+// How far back a package's recent downloads reach, counted from the newest snapshot.
+const recentDays = 30;
 
 export type Owner = { repository: string; status: "active" | "disputed"; claimed_at: string };
 export type Revocation = { reason: string; actor: string; evidence: string; revoked_at: string };
@@ -127,21 +127,26 @@ function previousDay(date: string): string {
 }
 
 // Each archive's downloads by day, as the difference of a day's snapshot from
-// the day before's, for the days where both were counted. GitHub keeps only
-// the total so far, so a day is known only from snapshots.
-function daysByArchive(): Map<string, Day[]> {
+// the day before's. GitHub keeps only the total so far, so a day is known only
+// from snapshots. An archive missing from the day before's snapshot counts
+// from 0 when its release was published no earlier than that day: it did not
+// exist yet, and its first downloads are that day's. Otherwise the day is left
+// out, since the archive's earlier downloads cannot be told apart.
+function daysByArchive(assets: Map<string, Asset>): Map<string, Day[]> {
   const taken = snapshots();
   const newest = taken.at(-1);
   if (!newest) return new Map();
   const byDate = new Map(taken.map((t) => [t.date, new Map(t.snapshot.assets.map((a) => [a.url, a.downloads]))]));
   const window: string[] = [];
-  for (let d = newest.date; window.length < chartDays; d = previousDay(d)) window.unshift(d);
+  for (let d = newest.date; window.length < recentDays; d = previousDay(d)) window.unshift(d);
   const result = new Map<string, Day[]>();
   for (const { url } of newest.snapshot.assets) {
     const days: Day[] = [];
     for (const date of window) {
       const today = byDate.get(date)?.get(url);
-      const before = byDate.get(previousDay(date))?.get(url);
+      const yesterday = byDate.get(previousDay(date));
+      const release = assets.get(url)?.published;
+      const before = yesterday?.get(url) ?? (yesterday && release && release >= previousDay(date) ? 0 : undefined);
       if (today !== undefined && before !== undefined) days.push({ date, downloads: Math.max(0, today - before) });
     }
     result.set(url, days);
@@ -228,7 +233,7 @@ async function read(): Promise<Package[]> {
   // the site is built; the days come from the snapshots.
   const versions = packages.flatMap((p) => p.versions);
   const assets = await assetsByUrl(new Set(versions.flatMap((v) => (v.archive ? [v.archive.repository] : []))));
-  const days = daysByArchive();
+  const days = daysByArchive(assets);
   for (const v of versions) {
     const asset = v.archive && assets.get(v.archive.url);
     if (!v.archive || !asset) continue;
@@ -259,6 +264,21 @@ export const packages: Package[] = await read();
 
 export function find(name: string): Package | undefined {
   return packages.find((p) => p.name === name);
+}
+
+// A package's downloads, every version's together, each archive counted once,
+// since two versions can name the same one; absent before any is known.
+export type PackageDownloads = { total: number; lastThirty: number; daily: boolean };
+
+export function packageDownloads(p: Package): PackageDownloads | undefined {
+  const archives = new Map(p.versions.flatMap((v) => (v.archive?.downloads ? [[v.archive.url, v.archive.downloads] as const] : [])));
+  if (archives.size === 0) return undefined;
+  const all = [...archives.values()];
+  return {
+    total: all.reduce((n, d) => n + d.total, 0),
+    lastThirty: all.reduce((n, d) => n + d.days.reduce((m, day) => m + day.downloads, 0), 0),
+    daily: all.some((d) => d.days.length > 0),
+  };
 }
 
 export type Totals = { packages: number; versions: number; downloads?: number };
